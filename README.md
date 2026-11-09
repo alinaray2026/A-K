@@ -18,6 +18,15 @@ with sample matches. Delete the `data/` folder to start over.
 
 `akbet-demo.html` is a standalone single-page version that runs in the browser with no server.
 
+## Deploying (Railway)
+
+1. On railway.com: **New Project → Deploy from GitHub repo** → pick this repo. Build and start commands are detected (`npm run build`, `npm start`).
+2. Add a **Volume** to the service, mounted at `/data`, so the database survives restarts and deploys.
+3. Under **Variables** set `DB_FILE=/data/bast.db` and `ADMIN_PASSWORD=<a strong password>` (before the first start).
+4. Under **Settings → Networking**, click **Generate Domain** to get a public link.
+
+Hosts without a persistent disk (e.g. Render's free tier) will wipe the SQLite database on every restart.
+
 ## Features
 
 - Matches by league with **1X2**, **Over/Under 2.5** and **GG/NG** markets

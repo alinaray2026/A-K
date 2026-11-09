@@ -14,12 +14,12 @@ export default function Sportsbook({ d, matches, loggedIn, balance }: { d: Dict;
     { id: "1X2", label: d.markets.m1x2, sels: ["1", "X", "2"] as Sel[], heads: ["1", "X", "2"] },
     { id: "OU", label: d.markets.ou, sels: ["O", "U"] as Sel[], heads: d.markets.ouHeads },
     { id: "BTTS", label: d.markets.btts, sels: ["GG", "NG"] as Sel[], heads: [d.selShort.GG, d.selShort.NG] },
-  ];
+  ].filter((mk) => mk.id === "1X2" || matches.some((m) => mk.sels.some((s) => m.odds[s]))); // hide markets the feed doesn't price
   const L = d.locale;
   const leagues = useMemo(() => [...new Set(matches.map((m) => m.league))], [matches]);
   const [league, setLeague] = useState<string>("all");
   const [marketId, setMarketId] = useState("1X2");
-  const market = MARKETS.find((m) => m.id === marketId)!;
+  const market = MARKETS.find((m) => m.id === marketId) ?? MARKETS[0];
   const [picks, setPicks] = useState<Pick[]>([]);
   const [stake, setStake] = useState("10");
   const [msg, setMsg] = useState<{ ok?: string; error?: string }>({});
@@ -79,6 +79,7 @@ export default function Sportsbook({ d, matches, loggedIn, balance }: { d: Dict;
               <div className={`odds cols-${market.sels.length}`}>
                 {market.sels.map((s) => {
                   const on = picks.some((p) => p.matchId === m.id && p.selection === s);
+                  if (!m.odds[s]) return <button key={s} className="odd" disabled aria-label={`${m.home} – ${m.away}: ${d.sel[s]}`}>–</button>;
                   return (
                     <button key={s} className={on ? "odd on" : "odd"} aria-pressed={on} onClick={() => toggle(m, s)}
                       aria-label={`${m.home} – ${m.away}: ${d.sel[s]} ${price(m.odds[s], L)}`}>

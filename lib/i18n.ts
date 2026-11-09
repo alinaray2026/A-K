@@ -5,7 +5,7 @@ export const LANG_NAME: Record<Lang, string> = { en: "English", it: "Italiano", 
 
 const en = {
   locale: "en",
-  countries: { Kosovo: "Kosovo", Albania: "Albania", England: "England", Italy: "Italy", Spain: "Spain" } as Record<string, string>,
+  countries: { Kosovo: "Kosovo", Albania: "Albania", England: "England", Italy: "Italy", Spain: "Spain", Germany: "Germany", Europe: "Europe" } as Record<string, string>,
   nav: { football: "Football", myBets: "My bets", leaderboard: "Leaderboard", admin: "Admin", results: "Results" },
   auth: {
     login: "Log in", signup: "Sign up", logout: "Log out", createAccount: "Create account",
@@ -33,11 +33,12 @@ const en = {
     generate: "Generate round", openMatches: "Open matches ({n})", score: "Score", save: "Save",
     simulate: "Simulate", cancel: "Cancel", homeGoals: "Home goals", awayGoals: "Away goals",
     users: "Users", openBets: "Open bets", staked: "Total staked", paid: "Paid out",
+    feed: "Live data", sync: "Sync now", never: "never", feedNote: "Real matches, odds and results from The Odds API. Last odds update: {odds}. Last results check: {scores}. Credits left this month: {credits}.", noFeed: "No ODDS_API_KEY set, so the app shows sample matches.",
   },
   msg: {
     betPlaced: "Bet #{id} placed! Potential win: {win}", scoreSaved: "Score saved, {n} bets settled",
     simulated: "Simulated {score}, {n} bets settled", matchCancelled: "Match cancelled, {n} bets refunded",
-    roundAdded: "Added {n} new matches", matchAdded: "{match} added",
+    roundAdded: "Added {n} new matches", matchAdded: "{match} added", synced: "{n} matches updated, {s} bets settled",
   },
   err: {
     minStake: "Minimum stake is {n}", emptySlip: "Bet slip is empty", maxSel: "Maximum {n} selections",
@@ -54,7 +55,7 @@ export type Dict = typeof en;
 
 const it: Dict = {
   locale: "it",
-  countries: { Kosovo: "Kosovo", Albania: "Albania", England: "Inghilterra", Italy: "Italia", Spain: "Spagna" },
+  countries: { Kosovo: "Kosovo", Albania: "Albania", England: "Inghilterra", Italy: "Italia", Spain: "Spagna", Germany: "Germania", Europe: "Europa" },
   nav: { football: "Calcio", myBets: "Le mie scommesse", leaderboard: "Classifica", admin: "Admin", results: "Risultati" },
   auth: {
     login: "Accedi", signup: "Registrati", logout: "Esci", createAccount: "Crea account",
@@ -82,11 +83,12 @@ const it: Dict = {
     generate: "Genera giornata", openMatches: "Partite aperte ({n})", score: "Risultato", save: "Salva",
     simulate: "Simula", cancel: "Annulla", homeGoals: "Gol casa", awayGoals: "Gol ospiti",
     users: "Utenti", openBets: "Scommesse aperte", staked: "Totale giocato", paid: "Pagato",
+    feed: "Dati live", sync: "Sincronizza ora", never: "mai", feedNote: "Partite, quote e risultati reali da The Odds API. Ultimo aggiornamento quote: {odds}. Ultimo controllo risultati: {scores}. Crediti rimasti questo mese: {credits}.", noFeed: "ODDS_API_KEY non impostata: l'app mostra partite di esempio.",
   },
   msg: {
     betPlaced: "Scommessa #{id} piazzata! Vincita potenziale: {win}", scoreSaved: "Risultato salvato, {n} scommesse liquidate",
     simulated: "Simulato {score}, {n} scommesse liquidate", matchCancelled: "Partita annullata, {n} scommesse rimborsate",
-    roundAdded: "Aggiunte {n} nuove partite", matchAdded: "{match} aggiunta",
+    roundAdded: "Aggiunte {n} nuove partite", matchAdded: "{match} aggiunta", synced: "{n} partite aggiornate, {s} scommesse liquidate",
   },
   err: {
     minStake: "L'importo minimo è {n}", emptySlip: "La schedina è vuota", maxSel: "Massimo {n} selezioni",
@@ -102,7 +104,7 @@ const it: Dict = {
 
 const de: Dict = {
   locale: "de",
-  countries: { Kosovo: "Kosovo", Albania: "Albanien", England: "England", Italy: "Italien", Spain: "Spanien" },
+  countries: { Kosovo: "Kosovo", Albania: "Albanien", England: "England", Italy: "Italien", Spain: "Spanien", Germany: "Deutschland", Europe: "Europa" },
   nav: { football: "Fußball", myBets: "Meine Wetten", leaderboard: "Rangliste", admin: "Admin", results: "Ergebnisse" },
   auth: {
     login: "Anmelden", signup: "Registrieren", logout: "Abmelden", createAccount: "Konto erstellen",
@@ -130,11 +132,12 @@ const de: Dict = {
     generate: "Spieltag erzeugen", openMatches: "Offene Spiele ({n})", score: "Ergebnis", save: "Speichern",
     simulate: "Simulieren", cancel: "Absagen", homeGoals: "Tore Heim", awayGoals: "Tore Auswärts",
     users: "Nutzer", openBets: "Offene Wetten", staked: "Gesamteinsatz", paid: "Ausgezahlt",
+    feed: "Live-Daten", sync: "Jetzt synchronisieren", never: "nie", feedNote: "Echte Spiele, Quoten und Ergebnisse von The Odds API. Letzte Quoten-Aktualisierung: {odds}. Letzte Ergebnisprüfung: {scores}. Verbleibende Credits diesen Monat: {credits}.", noFeed: "Kein ODDS_API_KEY gesetzt, daher zeigt die App Beispielspiele.",
   },
   msg: {
     betPlaced: "Wette #{id} platziert! Möglicher Gewinn: {win}", scoreSaved: "Ergebnis gespeichert, {n} Wetten abgerechnet",
     simulated: "Simuliert {score}, {n} Wetten abgerechnet", matchCancelled: "Spiel abgesagt, {n} Wetten erstattet",
-    roundAdded: "{n} neue Spiele hinzugefügt", matchAdded: "{match} hinzugefügt",
+    roundAdded: "{n} neue Spiele hinzugefügt", matchAdded: "{match} hinzugefügt", synced: "{n} Spiele aktualisiert, {s} Wetten abgerechnet",
   },
   err: {
     minStake: "Mindesteinsatz ist {n}", emptySlip: "Der Wettschein ist leer", maxSel: "Maximal {n} Auswahlen",

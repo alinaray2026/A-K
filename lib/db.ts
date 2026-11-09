@@ -71,14 +71,21 @@ function migrate(db: DatabaseSync) {
       price REAL NOT NULL,
       result TEXT NOT NULL DEFAULT 'pending'
     );
+    CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
     CREATE INDEX IF NOT EXISTS idx_sel_match ON bet_selections(match_id);
     CREATE INDEX IF NOT EXISTS idx_bets_user ON bets(user_id);
   `);
+  // columns added after the first release
+  const cols = (db.prepare("PRAGMA table_info(matches)").all() as { name: string }[]).map((c) => c.name);
+  if (!cols.includes("external_id")) db.exec("ALTER TABLE matches ADD COLUMN external_id TEXT");
+  if (!cols.includes("source")) db.exec("ALTER TABLE matches ADD COLUMN source TEXT NOT NULL DEFAULT 'sample'");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_ext ON matches(external_id)");
+
   const count = db.prepare("SELECT COUNT(*) AS n FROM users").get() as { n: number };
   if (count.n === 0) {
     db.prepare("INSERT INTO users (username, password_hash, is_admin, balance) VALUES (?, ?, 1, 1000)")
       .run("admin", hashPassword(process.env.ADMIN_PASSWORD ?? "admin123"));
-    seed(db);
+    if (!process.env.ODDS_API_KEY) seed(db); // with a live feed, matches come from the API instead
   }
 }
 

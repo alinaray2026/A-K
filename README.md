@@ -22,10 +22,26 @@ with sample matches. Delete the `data/` folder to start over.
 
 1. On railway.com: **New Project → Deploy from GitHub repo** → pick this repo. Build and start commands are detected (`npm run build`, `npm start`).
 2. Add a **Volume** to the service, mounted at `/data`, so the database survives restarts and deploys.
-3. Under **Variables** set `DB_FILE=/data/bast.db` and `ADMIN_PASSWORD=<a strong password>` (before the first start).
+3. Under **Variables** set `DB_FILE=/data/bast.db`, `ADMIN_PASSWORD=<a strong password>` (before the first start)
+   and `ODDS_API_KEY=<your key from the-odds-api.com>` for real matches, odds and results.
 4. Under **Settings → Networking**, click **Generate Domain** to get a public link.
 
 Hosts without a persistent disk (e.g. Render's free tier) will wipe the SQLite database on every restart.
+
+## Real matches (The Odds API)
+
+With `ODDS_API_KEY` set, matches, odds (median across ~20 bookmakers) and final scores come from
+[The Odds API](https://the-odds-api.com) instead of sample data. Sync runs automatically on page visits; admins can
+also press **Sync now**. Settings (optional):
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `ODDS_SPORTS` | Serie A, Bundesliga, Premier League, La Liga | comma-separated API sport keys (also `soccer_uefa_champs_league`) |
+| `ODDS_SYNC_HOURS` | 24 | how often odds are refreshed (2 credits per league) |
+| `SCORES_SYNC_HOURS` | 12 | how often results are checked, only for leagues with a match awaiting its score (2 credits per league) |
+
+The free plan (500 credits/month) covers the defaults; live use needs a paid plan for fresher odds.
+The admin panel shows the last sync times and credits left. Put the key in `.env.local` locally (git-ignored), never in code.
 
 ## Features
 

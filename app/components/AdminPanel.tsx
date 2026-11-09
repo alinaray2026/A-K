@@ -41,6 +41,11 @@ export default function AdminPanel({ d, matches }: { d: Dict; matches: M[] }) {
           <p className="muted">{a.newRoundNote}</p>
           <button className="btn btn-ghost" disabled={pending}>{a.generate}</button>
         </form>
+        <form action={act} className="card form">
+          <h2>{a.feed}</h2>
+          <input type="hidden" name="op" value="sync" />
+          <button className="btn btn-accent" disabled={pending}>{a.sync}</button>
+        </form>
       </div>
 
       <div className="card">

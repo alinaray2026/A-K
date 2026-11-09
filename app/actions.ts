@@ -13,6 +13,7 @@ import { AppError } from "@/lib/errors";
 import { fill, LANGS, type Dict, type ErrCode } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
 import { money } from "@/lib/format";
+import { syncOdds, syncScores } from "@/lib/sync";
 
 export type FormState = { error?: string; ok?: string };
 
@@ -98,6 +99,13 @@ export async function adminAction(_: FormState, fd: FormData): Promise<FormState
       return done(fill(d.msg.simulated, { score: `${s.home}-${s.away}`, n: settleMatch(id, s.home, s.away) }));
     }
     if (op === "cancel") return done(fill(d.msg.matchCancelled, { n: cancelMatch(id) }));
+    if (op === "sync") {
+      const sc = await syncScores(true), od = await syncOdds();
+      const errors = [...sc.errors, ...od.errors];
+      revalidatePath("/", "layout");
+      const text = fill(d.msg.synced, { n: od.matches + sc.matches, s: sc.settled });
+      return errors.length ? { error: `${text}. ${errors.join("; ")}` } : { ok: text };
+    }
     if (op === "round") return done(fill(d.msg.roundAdded, { n: generateRound(getDb()) }));
     if (op === "create") {
       const league = String(fd.get("league") ?? "").trim();

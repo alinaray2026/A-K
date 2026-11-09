@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth";
 import { all, get } from "@/lib/db";
 import { getDict } from "@/lib/lang";
-import { money } from "@/lib/format";
+import { fmtDateTime, money } from "@/lib/format";
+import { fill } from "@/lib/i18n";
+import { apiKey, creditsRemaining } from "@/lib/oddsapi";
+import { lastSync } from "@/lib/sync";
 import AdminPanel from "../components/AdminPanel";
 
 export default async function Admin() {
@@ -25,7 +28,18 @@ export default async function Admin() {
     <>
       <h1 className="page-title">{d.admin.title}</h1>
       <div className="stats">{stats.map(([k, v]) => <div key={k} className="card stat"><small>{k}</small><b>{v}</b></div>)}</div>
+      <FeedStatus />
       <AdminPanel d={d} matches={matches} />
     </>
+  );
+}
+
+async function FeedStatus() {
+  const d = await getDict();
+  if (!apiKey()) return <p className="card muted">{d.admin.noFeed}</p>;
+  const ls = lastSync();
+  const when = (t: number) => (t ? fmtDateTime(new Date(t).toISOString(), d.days) : d.admin.never);
+  return (
+    <p className="card feed"><b>● {d.admin.feed}</b> {fill(d.admin.feedNote, { odds: when(ls.odds), scores: when(ls.scores), credits: creditsRemaining() ?? "?" })}</p>
   );
 }

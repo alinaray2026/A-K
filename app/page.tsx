@@ -3,10 +3,12 @@ import { currentUser } from "@/lib/auth";
 import { listOpenMatches } from "@/lib/bets";
 import { all } from "@/lib/db";
 import { getDict } from "@/lib/lang";
+import { maybeSync } from "@/lib/sync";
 import Sportsbook from "./components/Sportsbook";
 import { fmtDateTime } from "@/lib/format";
 
 export default async function Home() {
+  await maybeSync();
   const [user, d] = await Promise.all([currentUser(), getDict()]);
   const matches = listOpenMatches();
   const results = all<{ id: number; league: string; home: string; away: string; home_goals: number; away_goals: number; kickoff: string; status: string }>(

@@ -145,3 +145,7 @@ input { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-
   .brand { font-size: 20px; }
   .account { gap: 6px; }
 }
+.odd:disabled { opacity: .45; cursor: default; }
+.feed { font-size: 14px; } .feed b { color: var(--win); margin-right: 6px; }
+.admin-grid { grid-template-columns: 2fr 1fr 1fr; }
+@media (max-width: 860px) { .admin-grid { grid-template-columns: 1fr; } }

@@ -1,21 +1,23 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import type { FormState } from "../actions";
+import type { Dict } from "@/lib/i18n";
 
-export default function AuthForm({ mode, action }: { mode: "login" | "register"; action: (s: FormState, fd: FormData) => Promise<FormState> }) {
+export default function AuthForm({ d, mode, action }: { d: Dict; mode: "login" | "register"; action: (s: FormState, fd: FormData) => Promise<FormState> }) {
   const [state, formAction, pending] = useActionState(action, {});
   const reg = mode === "register";
+  const [username, setUsername] = useState(""); // controlled, so it survives the form reset after an error
   return (
     <form action={formAction} className="card auth">
-      <h1>{reg ? "Create account" : "Log in"}</h1>
-      {reg && <p className="muted">Get 1,000 free virtual points to start.</p>}
-      <label>Username<input name="username" required autoComplete="username" /></label>
-      <label>Password<input name="password" type="password" required autoComplete={reg ? "new-password" : "current-password"} /></label>
+      <h1>{reg ? d.auth.createAccount : d.auth.login}</h1>
+      {reg && <p className="muted">{d.auth.startBonus}</p>}
+      <label>{d.auth.username}<input name="username" required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} /></label>
+      <label>{d.auth.password}<input name="password" type="password" required autoComplete={reg ? "new-password" : "current-password"} /></label>
       {state.error && <p className="err">{state.error}</p>}
-      <button className="btn btn-accent block" disabled={pending}>{pending ? "…" : reg ? "Sign up" : "Log in"}</button>
+      <button className="btn btn-accent block" disabled={pending}>{pending ? "…" : reg ? d.auth.signup : d.auth.login}</button>
       <p className="muted small">
-        {reg ? <>Have an account? <Link href="/login">Log in</Link></> : <>No account? <Link href="/register">Sign up</Link></>}
+        {reg ? <>{d.auth.haveAccount} <Link href="/login">{d.auth.login}</Link></> : <>{d.auth.noAccount} <Link href="/register">{d.auth.signup}</Link></>}
       </p>
     </form>
   );

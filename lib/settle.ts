@@ -1,5 +1,6 @@
 import { all, get, run, tx } from "./db.ts";
 import { round2, selectionWins, type Selection } from "./odds.ts";
+import { AppError } from "./errors.ts";
 
 type Sel = { id: number; bet_id: number; selection: Selection; price: number; result: string };
 
@@ -7,8 +8,8 @@ type Sel = { id: number; bet_id: number; selection: Selection; price: number; re
 export function settleMatch(matchId: number, hg: number, ag: number) {
   return tx(() => {
     const m = get<{ status: string }>("SELECT status FROM matches WHERE id = ?", matchId);
-    if (!m) throw new Error("Match not found");
-    if (m.status !== "scheduled") throw new Error("Match is already settled");
+    if (!m) throw new AppError("matchNotFound");
+    if (m.status !== "scheduled") throw new AppError("alreadySettled");
     run("UPDATE matches SET status = 'finished', home_goals = ?, away_goals = ? WHERE id = ?", hg, ag, matchId);
     const sels = all<Sel>("SELECT * FROM bet_selections WHERE match_id = ?", matchId);
     for (const s of sels) {
@@ -22,7 +23,7 @@ export function settleMatch(matchId: number, hg: number, ag: number) {
 export function cancelMatch(matchId: number) {
   return tx(() => {
     const m = get<{ status: string }>("SELECT status FROM matches WHERE id = ?", matchId);
-    if (!m || m.status !== "scheduled") throw new Error("Match cannot be cancelled");
+    if (!m || m.status !== "scheduled") throw new AppError("cannotCancel");
     run("UPDATE matches SET status = 'cancelled' WHERE id = ?", matchId);
     const sels = all<Sel>("SELECT * FROM bet_selections WHERE match_id = ?", matchId);
     run("UPDATE bet_selections SET result = 'void' WHERE match_id = ?", matchId);

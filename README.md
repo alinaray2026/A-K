@@ -22,6 +22,8 @@ with sample matches. Delete the `data/` folder to start over.
 
 - Matches by league with **1X2**, **Over/Under 2.5** and **GG/NG** markets
 - Bet slip: single or accumulator (up to 20 selections, one per match), quick stakes
+- English, Italian and German (auto-detected from the browser, switchable in the header)
+- Installable as a phone app (PWA): manifest, icons, offline page
 - Sign up / log in, 1,000 starting points + 100-point daily bonus
 - My bets (pending / won / lost / void) and a leaderboard
 - Admin panel: add matches (prices calculated from team ratings), enter scores,
@@ -33,3 +35,4 @@ with sample matches. Delete the `data/` folder to start over.
 - `lib/bets.ts` — places bets in a transaction; prices come from the server, never the client
 - `lib/settle.ts` — settlement: one lost leg loses the slip; cancelled legs count as 1.00
 - `app/actions.ts` — server actions for auth, betting and admin
+- `lib/i18n.ts` — all translations; errors are thrown as codes (`lib/errors.ts`) and translated per user

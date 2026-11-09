@@ -135,3 +135,13 @@ input { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-
   .actions { justify-content: flex-start; }
   .balance small { display: none; }
 }
+
+.langs { display: flex; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; overflow: hidden; }
+.langs button { background: none; border: 0; color: #cfe0f0; font-size: 12px; font-weight: 700; padding: 6px 8px; }
+.langs button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.topbar { padding-top: env(safe-area-inset-top, 0px); }
+@media (max-width: 520px) {
+  .topbar-in { height: auto; padding-block: 8px; flex-wrap: wrap; }
+  .brand { font-size: 20px; }
+  .account { gap: 6px; }
+}

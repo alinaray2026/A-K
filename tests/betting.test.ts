@@ -49,9 +49,9 @@ test("one lost leg loses the slip; cancellation refunds", () => {
 test("validation", () => {
   const u = user();
   const [a] = openMatches();
-  assert.throws(() => placeBet(u, [{ matchId: a, selection: "1" }], 5000), /Insufficient/);
-  assert.throws(() => placeBet(u, [{ matchId: a, selection: "1" }, { matchId: a, selection: "X" }], 5), /one selection/);
-  assert.throws(() => placeBet(u, [{ matchId: a, selection: "Z" }], 5), /Invalid selection/);
-  assert.throws(() => placeBet(u, [{ matchId: 1, selection: "1" }], 5), /closed/); // match 1 was settled above
+  assert.throws(() => placeBet(u, [{ matchId: a, selection: "1" }], 5000), { code: "insufficient" });
+  assert.throws(() => placeBet(u, [{ matchId: a, selection: "1" }, { matchId: a, selection: "X" }], 5), { code: "onePerMatch" });
+  assert.throws(() => placeBet(u, [{ matchId: a, selection: "Z" }], 5), { code: "invalidSel" });
+  assert.throws(() => placeBet(u, [{ matchId: 1, selection: "1" }], 5), { code: "closed" }); // match 1 was settled above
   assert.equal(bal(u), 1000);
 });

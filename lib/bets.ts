@@ -1,5 +1,6 @@
 import { all, get, run, tx } from "./db.ts";
 import { round2, SELECTIONS, type Selection } from "./odds.ts";
+import { AppError } from "./errors.ts";
 
 export const MIN_STAKE = 1;
 export const MAX_SELECTIONS = 20;
@@ -10,27 +11,27 @@ export type SlipItem = { matchId: number; selection: string };
 /** Places a bet; prices always come from the database, never from the client. */
 export function placeBet(userId: number, items: SlipItem[], stakeRaw: number) {
   const stake = round2(Number(stakeRaw));
-  if (!Number.isFinite(stake) || stake < MIN_STAKE) throw new Error(`Minimum stake is ${MIN_STAKE}`);
-  if (!Array.isArray(items) || items.length === 0) throw new Error("Bet slip is empty");
-  if (items.length > MAX_SELECTIONS) throw new Error(`Maximum ${MAX_SELECTIONS} selections`);
+  if (!Number.isFinite(stake) || stake < MIN_STAKE) throw new AppError("minStake", { n: MIN_STAKE });
+  if (!Array.isArray(items) || items.length === 0) throw new AppError("emptySlip");
+  if (items.length > MAX_SELECTIONS) throw new AppError("maxSel", { n: MAX_SELECTIONS });
   const ids = new Set<number>();
   for (const it of items) {
-    if (!SELECTIONS.includes(it.selection as Selection)) throw new Error("Invalid selection");
-    if (ids.has(it.matchId)) throw new Error("Only one selection per match");
+    if (!SELECTIONS.includes(it.selection as Selection)) throw new AppError("invalidSel");
+    if (ids.has(it.matchId)) throw new AppError("onePerMatch");
     ids.add(it.matchId);
   }
 
   return tx(() => {
     const user = get<{ balance: number }>("SELECT balance FROM users WHERE id = ?", userId);
-    if (!user) throw new Error("User not found");
-    if (user.balance < stake) throw new Error("Insufficient balance");
+    if (!user) throw new AppError("userNotFound");
+    if (user.balance < stake) throw new AppError("insufficient");
     const now = new Date().toISOString();
     const priced = items.map((it) => {
       const row = get<{ price: number; status: string; kickoff: string }>(
         `SELECT o.price, m.status, m.kickoff FROM odds o JOIN matches m ON m.id = o.match_id
          WHERE o.match_id = ? AND o.selection = ?`, it.matchId, it.selection);
-      if (!row) throw new Error("Match not found");
-      if (row.status !== "scheduled" || row.kickoff <= now) throw new Error("Betting on this match is closed");
+      if (!row) throw new AppError("matchNotFound");
+      if (row.status !== "scheduled" || row.kickoff <= now) throw new AppError("closed");
       return { ...it, price: row.price };
     });
     const totalOdds = round2(priced.reduce((p, s) => p * s.price, 1));

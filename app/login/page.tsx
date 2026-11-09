@@ -1,3 +1,4 @@
 import AuthForm from "../components/AuthForm";
 import { login } from "../actions";
-export default function Page() { return <AuthForm mode="login" action={login} />; }
+import { getDict } from "@/lib/lang";
+export default async function Page() { return <AuthForm d={await getDict()} mode="login" action={login} />; }

@@ -124,6 +124,10 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   .bal small { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) { .odd { transition: background .12s, border-color .12s; } }
+.langs { display: flex; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; overflow: hidden; }
+.langs button { background: none; border: 0; color: var(--nav-fg); font-size: 12px; font-weight: 700; padding: 6px 8px; }
+.langs button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 420px) { .top-in { height: auto; padding-block: 8px; flex-wrap: wrap; } .brand { font-size: 22px; } }
 </style>
 
 <header class="top">
@@ -133,21 +137,24 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
       A&amp;K <b>Bet</b>
     </div>
     <div class="acct">
-      <button class="btn btn-ghost sm" id="bonus" type="button" title="+100 points every day">Bonus +100</button>
-      <div class="bal"><small>Balance</small><b class="num" id="balance">0</b></div>
+      <div class="langs" id="langs" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button><button type="button" data-lang="it">IT</button><button type="button" data-lang="de">DE</button>
+      </div>
+      <button class="btn btn-ghost sm" id="bonus" type="button"></button>
+      <div class="bal"><small id="balLabel"></small><b class="num" id="balance">0</b></div>
     </div>
   </div>
   <nav class="sub"><div class="wrap sub-in" id="nav">
-    <button type="button" data-view="book" aria-current="true">Football</button>
-    <button type="button" data-view="bets">My bets</button>
-    <button type="button" data-view="results">Results</button>
+    <button type="button" data-view="book" aria-current="true"></button>
+    <button type="button" data-view="bets"></button>
+    <button type="button" data-view="results"></button>
   </div></nav>
 </header>
 
 <main class="wrap">
   <div class="card notice">
-    <span>Demo with virtual points, no real money. Press <b>Play matches</b> to see how your bets end.</span>
-    <button class="btn btn-accent sm" id="playAll" type="button">Play matches</button>
+    <span id="notice"></span>
+    <button class="btn btn-accent sm" id="playAll" type="button"></button>
   </div>
 
   <div id="view-book" class="book">
@@ -157,14 +164,14 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
       <div class="card events" id="events"></div>
     </section>
     <aside class="card slip" id="slip">
-      <button class="slip-head" id="slipHead" type="button"><span>Bet slip <span class="badge num" id="count">0</span></span><span class="num" id="headOdds"></span></button>
+      <button class="slip-head" id="slipHead" type="button"><span><span id="slipTitle"></span> <span class="badge num" id="count">0</span></span><span class="num" id="headOdds"></span></button>
       <div class="slip-body" id="slipBody"></div>
     </aside>
   </div>
 
   <div id="view-bets" class="page" hidden></div>
   <div id="view-results" class="page" hidden></div>
-  <footer class="foot">A&amp;K Bet demo · virtual points, no payments and no cash prizes · 18+ · Play responsibly</footer>
+  <footer class="foot" id="footer"></footer>
 </main>
 
 <script>
@@ -176,16 +183,73 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     "Italy · Serie A": { Inter: 90, Napoli: 87, Juventus: 86, Milan: 84, Atalanta: 84, Roma: 81, Lazio: 80, Bologna: 78 },
     "Spain · La Liga": { "Real Madrid": 93, Barcelona: 92, "Atlético Madrid": 87, "Athletic Club": 82, Villarreal: 81, "Real Sociedad": 79, Betis: 79, Sevilla: 76 },
   };
-  const MARKETS = [
+  const T = {
+    en: {
+      football: "Football", myBets: "My bets", results: "Results", balance: "Balance", bonus: "Bonus +100", bonusTitle: "+100 points every day",
+      notice: "Demo with virtual points, no real money. Press <b>Play matches</b> to see how your bets end.", play: "Play matches",
+      all: "All", match: "Match", slip: "Bet slip", odds: "Odds", stake: "Stake", potential: "Potential win", payout: "Payout",
+      single: "Single", acc: "Accumulator ({n})", place: "Place bet", insufficient: "Insufficient balance", clear: "Clear slip", remove: "Remove",
+      tap: "Tap a price to add it to your bet slip.", noOpen: "No open matches. Press “Play matches” for a new round.",
+      bets: "Bets", won: "Won", staked: "Staked", pointsWon: "Points won", noBets: "You haven't placed any bets yet.",
+      noResults: "No results yet. Press “Play matches”.", minStake: "Minimum stake is 1",
+      placed: "Bet #{id} placed. Potential win: {win}", youWon: "You won {n} bet(s): +{p} points", lostN: "{n} bet(s) lost",
+      played: "Matches played. A new round is ready.",
+      footer: "A&K Bet demo · virtual points, no payments and no cash prizes · 18+ · Play responsibly",
+      status: { open: "Pending", won: "Won", lost: "Lost", void: "Void" },
+      m: { ou: "Over/Under 2.5", btts: "GG/NG", ouH: ["Over", "Under"], bH: ["GG", "NG"] },
+      sel: { "1": "Home win (1)", X: "Draw (X)", "2": "Away win (2)", O: "Over 2.5 goals", U: "Under 2.5 goals", GG: "Both teams score (GG)", NG: "Not both score (NG)" },
+      short: { "1": "1", X: "X", "2": "2", O: "Over 2.5", U: "Under 2.5", GG: "GG", NG: "NG" },
+      days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      countries: { Kosovo: "Kosovo", Albania: "Albania", England: "England", Italy: "Italy", Spain: "Spain" },
+    },
+    it: {
+      football: "Calcio", myBets: "Le mie scommesse", results: "Risultati", balance: "Saldo", bonus: "Bonus +100", bonusTitle: "+100 punti ogni giorno",
+      notice: "Demo con punti virtuali, niente soldi veri. Premi <b>Gioca le partite</b> per vedere come finiscono le tue scommesse.", play: "Gioca le partite",
+      all: "Tutte", match: "Partita", slip: "Schedina", odds: "Quota", stake: "Importo", potential: "Vincita potenziale", payout: "Pagamento",
+      single: "Singola", acc: "Multipla ({n})", place: "Scommetti", insufficient: "Saldo insufficiente", clear: "Svuota schedina", remove: "Rimuovi",
+      tap: "Tocca una quota per aggiungerla alla schedina.", noOpen: "Nessuna partita aperta. Premi “Gioca le partite” per una nuova giornata.",
+      bets: "Scommesse", won: "Vinte", staked: "Giocato", pointsWon: "Punti vinti", noBets: "Non hai ancora piazzato scommesse.",
+      noResults: "Ancora nessun risultato. Premi “Gioca le partite”.", minStake: "L'importo minimo è 1",
+      placed: "Scommessa #{id} piazzata. Vincita potenziale: {win}", youWon: "Hai vinto {n} scommessa/e: +{p} punti", lostN: "{n} scommessa/e persa/e",
+      played: "Partite giocate. Una nuova giornata è pronta.",
+      footer: "A&K Bet demo · punti virtuali, nessun pagamento e nessuna vincita in denaro · 18+ · Gioca responsabilmente",
+      status: { open: "In attesa", won: "Vinta", lost: "Persa", void: "Rimborsata" },
+      m: { ou: "Under/Over 2,5", btts: "GG/NG", ouH: ["Over", "Under"], bH: ["GG", "NG"] },
+      sel: { "1": "Vittoria casa (1)", X: "Pareggio (X)", "2": "Vittoria trasferta (2)", O: "Over 2,5 gol", U: "Under 2,5 gol", GG: "Entrambe segnano (GG)", NG: "Non entrambe segnano (NG)" },
+      short: { "1": "1", X: "X", "2": "2", O: "Over 2,5", U: "Under 2,5", GG: "GG", NG: "NG" },
+      days: ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"],
+      countries: { Kosovo: "Kosovo", Albania: "Albania", England: "Inghilterra", Italy: "Italia", Spain: "Spagna" },
+    },
+    de: {
+      football: "Fußball", myBets: "Meine Wetten", results: "Ergebnisse", balance: "Guthaben", bonus: "Bonus +100", bonusTitle: "+100 Punkte jeden Tag",
+      notice: "Demo mit virtuellen Punkten, kein Echtgeld. Tippe auf <b>Spiele austragen</b>, um zu sehen, wie deine Wetten ausgehen.", play: "Spiele austragen",
+      all: "Alle", match: "Spiel", slip: "Wettschein", odds: "Quote", stake: "Einsatz", potential: "Möglicher Gewinn", payout: "Auszahlung",
+      single: "Einzelwette", acc: "Kombiwette ({n})", place: "Wette platzieren", insufficient: "Guthaben reicht nicht", clear: "Wettschein leeren", remove: "Entfernen",
+      tap: "Tippe auf eine Quote, um sie zum Wettschein hinzuzufügen.", noOpen: "Keine offenen Spiele. Tippe auf „Spiele austragen“ für einen neuen Spieltag.",
+      bets: "Wetten", won: "Gewonnen", staked: "Eingesetzt", pointsWon: "Gewonnene Punkte", noBets: "Du hast noch keine Wetten platziert.",
+      noResults: "Noch keine Ergebnisse. Tippe auf „Spiele austragen“.", minStake: "Mindesteinsatz ist 1",
+      placed: "Wette #{id} platziert. Möglicher Gewinn: {win}", youWon: "{n} Wette(n) gewonnen: +{p} Punkte", lostN: "{n} Wette(n) verloren",
+      played: "Spiele ausgetragen. Ein neuer Spieltag ist bereit.",
+      footer: "A&K Bet Demo · virtuelle Punkte, keine Zahlungen und keine Geldgewinne · 18+ · Spiele verantwortungsvoll",
+      status: { open: "Offen", won: "Gewonnen", lost: "Verloren", void: "Erstattet" },
+      m: { ou: "Über/Unter 2,5", btts: "Beide treffen", ouH: ["Über", "Unter"], bH: ["Ja", "Nein"] },
+      sel: { "1": "Heimsieg (1)", X: "Unentschieden (X)", "2": "Auswärtssieg (2)", O: "Über 2,5 Tore", U: "Unter 2,5 Tore", GG: "Beide treffen: Ja", NG: "Beide treffen: Nein" },
+      short: { "1": "1", X: "X", "2": "2", O: "Über 2,5", U: "Unter 2,5", GG: "Ja", NG: "Nein" },
+      days: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
+      countries: { Kosovo: "Kosovo", Albania: "Albanien", England: "England", Italy: "Italien", Spain: "Spanien" },
+    },
+  };
+  const KEY = "golbet-demo-v1", LANG_KEY = "akbet-lang";
+  let lang = "en";
+  try { lang = localStorage.getItem(LANG_KEY) || ""; } catch (e) {}
+  if (!T[lang]) { const nav = (navigator.language || "en").slice(0, 2); lang = T[nav] ? nav : "en"; }
+  let t = T[lang];
+  const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
+  const markets = () => [
     { id: "1X2", label: "1X2", sels: ["1", "X", "2"], heads: ["1", "X", "2"] },
-    { id: "OU", label: "Over/Under 2.5", sels: ["O", "U"], heads: ["Over", "Under"] },
-    { id: "BTTS", label: "GG/NG", sels: ["GG", "NG"], heads: ["GG", "NG"] },
+    { id: "OU", label: t.m.ou, sels: ["O", "U"], heads: t.m.ouH },
+    { id: "BTTS", label: t.m.btts, sels: ["GG", "NG"], heads: t.m.bH },
   ];
-  const SEL_NAME = { "1": "Home win (1)", X: "Draw (X)", "2": "Away win (2)", O: "Over 2.5 goals", U: "Under 2.5 goals", GG: "Both teams score (GG)", NG: "Not both score (NG)" };
-  const SEL_SHORT = { "1": "1", X: "X", "2": "2", O: "Over 2.5", U: "Under 2.5", GG: "GG", NG: "NG" };
-  const STATUS = { open: "Pending", won: "Won", lost: "Lost", void: "Void" };
-  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const KEY = "golbet-demo-v1";
 
   // ---- price model (Poisson, 6% margin) ----
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -228,86 +292,95 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   }
   if (!S) { S = { balance: 1000, matches: [], bets: [], nextId: 1, nextBet: 1, lastBonus: null }; newRound(); save(); }
 
-  let league = "all", market = MARKETS[0], picks = [], stake = "10", msg = null, view = "book";
+  let league = "all", marketId = "1X2", picks = [], stake = "10", msg = null, view = "book", banner = null;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const money = (n) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = (n) => { const [i, d] = Math.abs(n).toFixed(2).split("."); const s = lang === "en" ? [",", "."] : [".", ","]; return (n < 0 ? "-" : "") + i.replace(/\B(?=(\d{3})+(?!\d))/g, s[0]) + s[1] + d; };
+  const pr = (n) => lang === "en" ? n.toFixed(2) : n.toFixed(2).replace(".", ",");
   const pad = (n) => String(n).padStart(2, "0");
-  const fmt = (iso) => { const d = new Date(iso); return `${DAYS[d.getDay()]}, ${pad(d.getDate())}.${pad(d.getMonth() + 1)} · ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const fmt = (iso) => { const d = new Date(iso); return `${t.days[d.getDay()]}, ${pad(d.getDate())}.${pad(d.getMonth() + 1)} · ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const lg = (l) => { const [c, ...r] = l.split(" · "); return r.length && t.countries[c] ? [t.countries[c], ...r].join(" · ") : l; };
   const today = () => new Date().toDateString();
   const matchById = (id) => S.matches.find((m) => m.id === id);
 
-  function renderHeader() {
-    $("balance").textContent = money(S.balance);
-    $("bonus").hidden = S.lastBonus === today();
+  function renderChrome() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("#langs button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+    const nav = { book: t.football, bets: t.myBets, results: t.results };
+    document.querySelectorAll("#nav button").forEach((b) => { b.textContent = nav[b.dataset.view]; b.setAttribute("aria-current", b.dataset.view === view); });
+    $("balLabel").textContent = t.balance; $("balance").textContent = money(S.balance);
+    $("bonus").textContent = t.bonus; $("bonus").title = t.bonusTitle; $("bonus").hidden = S.lastBonus === today();
+    $("notice").innerHTML = t.notice; $("playAll").textContent = t.play; $("slipTitle").textContent = t.slip; $("footer").textContent = t.footer;
   }
 
   function renderBook() {
+    const market = markets().find((m) => m.id === marketId);
     const open = S.matches.filter((m) => m.status === "open");
     const leagues = [...new Set(open.map((m) => m.league))];
-    $("chips").innerHTML = [["all", "All"], ...leagues.map((l) => [l, l])]
-      .map(([v, t]) => `<button type="button" class="chip" data-league="${esc(v)}" aria-pressed="${league === v}">${esc(t)}</button>`).join("");
-    $("tabs").innerHTML = MARKETS.map((mk) => `<button type="button" class="tab" data-market="${mk.id}" aria-pressed="${market.id === mk.id}">${mk.label}</button>`).join("");
+    $("chips").innerHTML = [["all", t.all], ...leagues.map((l) => [l, lg(l)])]
+      .map(([v, x]) => `<button type="button" class="chip" data-league="${esc(v)}" aria-pressed="${league === v}">${esc(x)}</button>`).join("");
+    $("tabs").innerHTML = markets().map((mk) => `<button type="button" class="tab" data-market="${mk.id}" aria-pressed="${marketId === mk.id}">${esc(mk.label)}</button>`).join("");
     const shown = league === "all" ? open : open.filter((m) => m.league === league);
     const cols = `cols-${market.sels.length}`;
-    $("events").innerHTML = `<div class="ev-head"><span>Match</span><div class="odds ${cols}">${market.heads.map((h) => `<span>${h}</span>`).join("")}</div></div>` +
-      (shown.length ? shown.map((m) => `<div class="ev"><div class="ev-info"><div class="ev-meta">${fmt(m.kickoff)} · ${esc(m.league)}</div><div class="ev-team">${esc(m.home)}</div><div class="ev-team">${esc(m.away)}</div></div>
-        <div class="odds ${cols}">${market.sels.map((s) => `<button type="button" class="odd" data-m="${m.id}" data-s="${s}" aria-pressed="${picks.some((p) => p.m === m.id && p.s === s)}" aria-label="${esc(m.home)} – ${esc(m.away)}: ${SEL_NAME[s]} ${m.odds[s].toFixed(2)}">${m.odds[s].toFixed(2)}</button>`).join("")}</div></div>`).join("")
-      : `<p class="empty">No open matches. Press “Play matches” for a new round.</p>`);
+    $("events").innerHTML = `<div class="ev-head"><span>${t.match}</span><div class="odds ${cols}">${market.heads.map((h) => `<span>${esc(h)}</span>`).join("")}</div></div>` +
+      (shown.length ? shown.map((m) => `<div class="ev"><div class="ev-info"><div class="ev-meta">${fmt(m.kickoff)} · ${esc(lg(m.league))}</div><div class="ev-team">${esc(m.home)}</div><div class="ev-team">${esc(m.away)}</div></div>
+        <div class="odds ${cols}">${market.sels.map((s) => `<button type="button" class="odd" data-m="${m.id}" data-s="${s}" aria-pressed="${picks.some((p) => p.m === m.id && p.s === s)}" aria-label="${esc(m.home)} – ${esc(m.away)}: ${esc(t.sel[s])} ${pr(m.odds[s])}">${pr(m.odds[s])}</button>`).join("")}</div></div>`).join("")
+      : `<p class="empty">${esc(t.noOpen)}</p>`);
     renderSlip();
   }
 
   function renderSlip() {
     const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1);
-    const st = Number(stake) || 0;
+    const st = Number(String(stake).replace(",", ".")) || 0;
     $("count").textContent = picks.length;
-    $("headOdds").textContent = picks.length ? `Odds ${total.toFixed(2)}` : "";
+    $("headOdds").textContent = picks.length ? `${t.odds} ${pr(total)}` : "";
     const m = msg ? `<p class="msg ${msg.ok ? "ok" : "err"}">${esc(msg.ok || msg.err)}</p>` : "";
-    if (!picks.length) { $("slipBody").innerHTML = `<p class="empty">Tap a price to add it to your bet slip.</p>${m}`; return; }
-    $("slipBody").innerHTML = picks.map((p) => { const mt = matchById(p.m); return `<div class="pick"><div><div class="pick-sel">${SEL_NAME[p.s]}</div><div class="muted small">${esc(mt.home)} – ${esc(mt.away)}</div></div><b class="num">${mt.odds[p.s].toFixed(2)}</b><button type="button" class="x" data-remove="${p.m}" aria-label="Remove">×</button></div>`; }).join("") +
-      `<div class="row"><span>${picks.length > 1 ? `Accumulator (${picks.length})` : "Single"}</span><b class="num">${total.toFixed(2)}</b></div>
-       <label class="stake" for="stake"><span>Stake</span><input id="stake" type="number" min="1" step="1" inputmode="decimal" value="${esc(stake)}"></label>
+    if (!picks.length) { $("slipBody").innerHTML = `<p class="empty">${esc(t.tap)}</p>${m}`; return; }
+    $("slipBody").innerHTML = picks.map((p) => { const mt = matchById(p.m); return `<div class="pick"><div><div class="pick-sel">${esc(t.sel[p.s])}</div><div class="muted small">${esc(mt.home)} – ${esc(mt.away)}</div></div><b class="num">${pr(mt.odds[p.s])}</b><button type="button" class="x" data-remove="${p.m}" aria-label="${esc(t.remove)}">×</button></div>`; }).join("") +
+      `<div class="row"><span>${picks.length > 1 ? fill(t.acc, { n: picks.length }) : t.single}</span><b class="num">${pr(total)}</b></div>
+       <label class="stake" for="stake"><span>${t.stake}</span><input id="stake" type="number" min="1" step="1" inputmode="decimal" value="${esc(stake)}"></label>
        <div class="quick">${[5, 10, 50, 100].map((v) => `<button type="button" data-stake="${v}">${v}</button>`).join("")}</div>
-       <div class="row"><span>Potential win</span><b class="win num" id="potential">${money(st * total)}</b></div>
-       <button type="button" class="btn btn-accent block" id="place" ${st < 1 || st > S.balance ? "disabled" : ""}>${st > S.balance ? "Insufficient balance" : "Place bet"}</button>
-       <button type="button" class="linkbtn" id="clear">Clear slip</button>${m}`;
+       <div class="row"><span>${t.potential}</span><b class="win num" id="potential">${money(st * total)}</b></div>
+       <button type="button" class="btn btn-accent block" id="place" ${st < 1 || st > S.balance ? "disabled" : ""}>${st > S.balance ? t.insufficient : t.place}</button>
+       <button type="button" class="linkbtn" id="clear">${t.clear}</button>${m}`;
   }
 
   function renderBets() {
     const won = S.bets.filter((b) => b.status === "won");
     const staked = S.bets.reduce((s, b) => s + b.stake, 0);
     const paid = S.bets.reduce((s, b) => s + (b.payout || 0), 0);
-    $("view-bets").innerHTML = `<h1>My bets</h1>
-      <div class="stats"><div class="card stat"><small>Bets</small><b>${S.bets.length}</b></div><div class="card stat"><small>Won</small><b>${won.length}</b></div>
-      <div class="card stat"><small>Staked</small><b>${money(staked)}</b></div><div class="card stat"><small>Points won</small><b>${money(paid)}</b></div></div>` +
+    const ban = banner ? `<p class="msg ${banner.ok ? "ok" : "err"}">${esc(banner.ok || banner.err)}</p>` : "";
+    $("view-bets").innerHTML = `<h1>${t.myBets}</h1>${ban}
+      <div class="stats"><div class="card stat"><small>${t.bets}</small><b>${S.bets.length}</b></div><div class="card stat"><small>${t.won}</small><b>${won.length}</b></div>
+      <div class="card stat"><small>${t.staked}</small><b>${money(staked)}</b></div><div class="card stat"><small>${t.pointsWon}</small><b>${money(paid)}</b></div></div>` +
       (S.bets.length ? `<div class="bets">${S.bets.slice().reverse().map((b) => `<article class="card bet ${b.status}">
-        <div class="bet-top"><span>#${b.id} · ${fmt(b.at)}</span><span class="tag ${b.status}">${STATUS[b.status]}</span></div>
-        ${b.sels.map((s) => { const m = matchById(s.m); return `<div class="bsel"><span class="dot ${s.r}"></span><div><div>${esc(m.home)} – ${esc(m.away)} ${m.status === "done" ? `<b>(${m.hg}–${m.ag})</b>` : ""}</div><div class="muted small">${SEL_SHORT[s.s]} · ${fmt(m.kickoff)}</div></div><b class="num">${s.price.toFixed(2)}</b></div>`; }).join("")}
-        <div class="bet-foot"><span>Stake <b class="num">${money(b.stake)}</b></span><span>Odds <b class="num">${b.odds.toFixed(2)}</b></span><span>${b.status === "open" ? "Potential win" : "Payout"} <b class="num">${money(b.status === "open" ? b.potential : b.payout)}</b></span></div>
-      </article>`).join("")}</div>` : `<p class="card empty">You haven't placed any bets yet.</p>`);
+        <div class="bet-top"><span>#${b.id} · ${fmt(b.at)}</span><span class="tag ${b.status}">${t.status[b.status]}</span></div>
+        ${b.sels.map((s) => { const m = matchById(s.m); return `<div class="bsel"><span class="dot ${s.r}"></span><div><div>${esc(m.home)} – ${esc(m.away)} ${m.status === "done" ? `<b>(${m.hg}–${m.ag})</b>` : ""}</div><div class="muted small">${esc(t.short[s.s])} · ${fmt(m.kickoff)}</div></div><b class="num">${pr(s.price)}</b></div>`; }).join("")}
+        <div class="bet-foot"><span>${t.stake} <b class="num">${money(b.stake)}</b></span><span>${t.odds} <b class="num">${pr(b.odds)}</b></span><span>${b.status === "open" ? t.potential : t.payout} <b class="num">${money(b.status === "open" ? b.potential : b.payout)}</b></span></div>
+      </article>`).join("")}</div>` : `<p class="card empty">${esc(t.noBets)}</p>`);
   }
 
   function renderResults() {
     const done = S.matches.filter((m) => m.status === "done").slice(-40).reverse();
-    $("view-results").innerHTML = `<h1>Results</h1>` + (done.length ? `<div class="card results">${done.map((m) => `<div class="res"><span class="muted small">${esc(m.league)} · ${fmt(m.kickoff)}</span><span>${esc(m.home)} <b>${m.hg} – ${m.ag}</b> ${esc(m.away)}</span></div>`).join("")}</div>` : `<p class="card empty">No results yet. Press “Play matches”.</p>`);
+    const ban = banner ? `<p class="msg ok">${esc(banner.ok)}</p>` : "";
+    $("view-results").innerHTML = `<h1>${t.results}</h1>${ban}` + (done.length ? `<div class="card results">${done.map((m) => `<div class="res"><span class="muted small">${esc(lg(m.league))} · ${fmt(m.kickoff)}</span><span>${esc(m.home)} <b>${m.hg} – ${m.ag}</b> ${esc(m.away)}</span></div>`).join("")}</div>` : `<p class="card empty">${esc(t.noResults)}</p>`);
   }
 
   function render() {
-    renderHeader();
+    renderChrome();
     for (const v of ["book", "bets", "results"]) $("view-" + v).hidden = view !== v;
-    document.querySelectorAll("#nav button").forEach((b) => b.setAttribute("aria-current", b.dataset.view === view));
     if (view === "book") renderBook(); else if (view === "bets") renderBets(); else renderResults();
   }
 
   function place() {
-    const st = r2(Number(stake));
-    if (!(st >= 1)) { msg = { err: "Minimum stake is 1" }; return; }
-    if (st > S.balance) { msg = { err: "Insufficient balance" }; return; }
+    const st = r2(Number(String(stake).replace(",", ".")));
+    if (!(st >= 1)) { msg = { err: t.minStake }; return; }
+    if (st > S.balance) { msg = { err: t.insufficient }; return; }
     const sels = picks.map((p) => ({ m: p.m, s: p.s, price: matchById(p.m).odds[p.s], r: "pending" }));
     const odds = r2(sels.reduce((x, s) => x * s.price, 1));
     const bet = { id: S.nextBet++, stake: st, odds, potential: r2(st * odds), payout: 0, status: "open", at: new Date().toISOString(), sels };
     S.balance = r2(S.balance - st); S.bets.push(bet); picks = [];
-    msg = { ok: `Bet #${bet.id} placed. Potential win: ${money(bet.potential)}` };
+    msg = { ok: fill(t.placed, { id: bet.id, win: money(bet.potential) }) };
     save();
   }
 
@@ -320,41 +393,47 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
       if (b.sels.some((s) => s.r === "lost")) { b.status = "lost"; lostCount++; }
       else if (b.sels.every((s) => s.r === "won")) { b.status = "won"; b.payout = r2(b.stake * b.odds); S.balance = r2(S.balance + b.payout); paid += b.payout; wonCount++; }
     }
-    S.matches = S.matches.filter((m) => m.status === "open" || S.bets.some((b) => b.sels.some((s) => s.m === m.id)) || true).slice(-200);
-    picks = []; newRound(); save();
-    msg = (wonCount || lostCount) ? (wonCount ? { ok: `${wonCount} bet(s) won: +${money(paid)} points. ${lostCount ? lostCount + " lost." : ""}` } : { err: `${lostCount} bet(s) lost. Try again in the new round.` }) : { ok: "Matches played. A new round is ready." };
-    view = (wonCount || lostCount) ? "bets" : "results";
-    if (view === "bets") setTimeout(() => { msg = null; }, 0);
+    // keep finished matches that bets still point to, drop the oldest others
+    const used = new Set(S.bets.flatMap((b) => b.sels.map((s) => s.m)));
+    const done = S.matches.filter((m) => m.status === "done" && !used.has(m.id));
+    const dropIds = new Set(done.slice(0, Math.max(0, done.length - 120)).map((m) => m.id));
+    S.matches = S.matches.filter((m) => !dropIds.has(m.id));
+    picks = []; msg = null; newRound(); save();
+    if (wonCount || lostCount) {
+      view = "bets";
+      banner = wonCount ? { ok: fill(t.youWon, { n: wonCount, p: money(paid) }) + (lostCount ? " · " + fill(t.lostN, { n: lostCount }) : "") } : { err: fill(t.lostN, { n: lostCount }) };
+    } else { view = "results"; banner = { ok: t.played }; }
     render();
-    if (view === "bets") { const p = document.createElement("p"); p.className = "msg " + (wonCount ? "ok" : "err"); p.textContent = wonCount ? `You won ${wonCount} bet(s): +${money(paid)} points` : `${lostCount} bet(s) lost`; $("view-bets").insertBefore(p, $("view-bets").children[1]); }
+    banner = null;
     window.scrollTo(0, 0);
   }
 
   document.addEventListener("click", (e) => {
-    const t = e.target.closest("button"); if (!t) return;
-    if (t.dataset.view) { view = t.dataset.view; msg = null; render(); window.scrollTo(0, 0); return; }
-    if (t.dataset.league) { league = t.dataset.league; renderBook(); return; }
-    if (t.dataset.market) { market = MARKETS.find((m) => m.id === t.dataset.market); renderBook(); return; }
-    if (t.dataset.m) {
-      const m = Number(t.dataset.m), s = t.dataset.s; msg = null;
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.lang) { lang = b.dataset.lang; t = T[lang]; try { localStorage.setItem(LANG_KEY, lang); } catch (err) {} msg = null; render(); return; }
+    if (b.dataset.view) { view = b.dataset.view; msg = null; render(); window.scrollTo(0, 0); return; }
+    if (b.dataset.league) { league = b.dataset.league; renderBook(); return; }
+    if (b.dataset.market) { marketId = b.dataset.market; renderBook(); return; }
+    if (b.dataset.m) {
+      const m = Number(b.dataset.m), s = b.dataset.s; msg = null;
       const same = picks.some((p) => p.m === m && p.s === s);
       picks = picks.filter((p) => p.m !== m); if (!same && picks.length < 20) picks.push({ m, s });
       renderBook(); return;
     }
-    if (t.dataset.remove) { picks = picks.filter((p) => p.m !== Number(t.dataset.remove)); renderBook(); return; }
-    if (t.dataset.stake) { stake = t.dataset.stake; renderSlip(); return; }
-    if (t.id === "place") { place(); render(); return; }
-    if (t.id === "clear") { picks = []; msg = null; renderBook(); return; }
-    if (t.id === "slipHead") { $("slip").classList.toggle("open"); return; }
-    if (t.id === "bonus") { if (S.lastBonus !== today()) { S.lastBonus = today(); S.balance = r2(S.balance + 100); save(); } renderHeader(); if (view === "book") renderSlip(); return; }
-    if (t.id === "playAll") { playAll(); return; }
+    if (b.dataset.remove) { picks = picks.filter((p) => p.m !== Number(b.dataset.remove)); renderBook(); return; }
+    if (b.dataset.stake) { stake = b.dataset.stake; renderSlip(); return; }
+    if (b.id === "place") { place(); render(); return; }
+    if (b.id === "clear") { picks = []; msg = null; renderBook(); return; }
+    if (b.id === "slipHead") { $("slip").classList.toggle("open"); return; }
+    if (b.id === "bonus") { if (S.lastBonus !== today()) { S.lastBonus = today(); S.balance = r2(S.balance + 100); save(); } renderChrome(); if (view === "book") renderSlip(); return; }
+    if (b.id === "playAll") { playAll(); return; }
   });
   document.addEventListener("input", (e) => {
     if (e.target.id !== "stake") return;
     stake = e.target.value;
-    const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1), st = Number(stake) || 0;
+    const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1), st = Number(String(stake).replace(",", ".")) || 0;
     $("potential").textContent = money(st * total);
-    const btn = $("place"); btn.disabled = st < 1 || st > S.balance; btn.textContent = st > S.balance ? "Insufficient balance" : "Place bet";
+    const btn = $("place"); btn.disabled = st < 1 || st > S.balance; btn.textContent = st > S.balance ? t.insufficient : t.place;
   });
   render();
 })();

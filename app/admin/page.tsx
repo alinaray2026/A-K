@@ -1,25 +1,31 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth";
-import { all } from "@/lib/db";
+import { all, get } from "@/lib/db";
+import { getDict } from "@/lib/lang";
+import { money } from "@/lib/format";
 import AdminPanel from "../components/AdminPanel";
 
 export default async function Admin() {
-  const user = await currentUser();
+  const [user, d] = await Promise.all([currentUser(), getDict()]);
   if (!user?.is_admin) redirect("/");
   const matches = all<{ id: number; league: string; home: string; away: string; kickoff: string; open_bets: number }>(
     `SELECT m.id, m.league, m.home, m.away, m.kickoff,
        (SELECT COUNT(DISTINCT s.bet_id) FROM bet_selections s WHERE s.match_id = m.id) AS open_bets
      FROM matches m WHERE m.status = 'scheduled' ORDER BY m.kickoff`);
-  const stats = all<{ k: string; v: number }>(
-    `SELECT 'Users' AS k, COUNT(*) AS v FROM users
-     UNION ALL SELECT 'Open bets', COUNT(*) FROM bets WHERE status = 'open'
-     UNION ALL SELECT 'Total staked', COALESCE(ROUND(SUM(stake), 2), 0) FROM bets
-     UNION ALL SELECT 'Paid out', COALESCE(ROUND(SUM(payout), 2), 0) FROM bets`);
+  const s = get<{ users: number; open: number; staked: number; paid: number }>(
+    `SELECT (SELECT COUNT(*) FROM users) AS users,
+            (SELECT COUNT(*) FROM bets WHERE status = 'open') AS open,
+            (SELECT COALESCE(SUM(stake), 0) FROM bets) AS staked,
+            (SELECT COALESCE(SUM(payout), 0) FROM bets) AS paid`)!;
+  const stats: [string, string | number][] = [
+    [d.admin.users, s.users], [d.admin.openBets, s.open],
+    [d.admin.staked, money(s.staked, d.locale)], [d.admin.paid, money(s.paid, d.locale)],
+  ];
   return (
     <>
-      <h1 className="page-title">Admin panel</h1>
-      <div className="stats">{stats.map((s) => <div key={s.k} className="card stat"><small>{s.k}</small><b>{s.v}</b></div>)}</div>
-      <AdminPanel matches={matches} />
+      <h1 className="page-title">{d.admin.title}</h1>
+      <div className="stats">{stats.map(([k, v]) => <div key={k} className="card stat"><small>{k}</small><b>{v}</b></div>)}</div>
+      <AdminPanel d={d} matches={matches} />
     </>
   );
 }

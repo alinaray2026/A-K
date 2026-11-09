@@ -157,6 +157,7 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     <button class="btn btn-accent sm" id="playAll" type="button"></button>
   </div>
 
+  <div id="flash"></div>
   <div id="view-book" class="book">
     <section>
       <div class="chips" id="chips"></div>
@@ -186,12 +187,12 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   const T = {
     en: {
       football: "Football", myBets: "My bets", results: "Results", balance: "Balance", bonus: "Bonus +100", bonusTitle: "+100 points every day",
-      notice: "Demo with virtual points, no real money. Press <b>Play matches</b> to see how your bets end.", play: "Play matches",
+      notice: "Demo with virtual points, no real money. Matches are played automatically at kick-off, and new ones are added every day. <b>Play now</b> plays them all at once.", play: "Play now", autoPlayed: "{n} matches have finished. New matches were added.",
       all: "All", match: "Match", slip: "Bet slip", odds: "Odds", stake: "Stake", potential: "Potential win", payout: "Payout",
       single: "Single", acc: "Accumulator ({n})", place: "Place bet", insufficient: "Insufficient balance", clear: "Clear slip", remove: "Remove",
-      tap: "Tap a price to add it to your bet slip.", noOpen: "No open matches. Press “Play matches” for a new round.",
+      tap: "Tap a price to add it to your bet slip.", noOpen: "No open matches. Press “Play now” for a new round.",
       bets: "Bets", won: "Won", staked: "Staked", pointsWon: "Points won", noBets: "You haven't placed any bets yet.",
-      noResults: "No results yet. Press “Play matches”.", minStake: "Minimum stake is 1",
+      noResults: "No results yet. Press “Play now”.", minStake: "Minimum stake is 1",
       placed: "Bet #{id} placed. Potential win: {win}", youWon: "You won {n} bet(s): +{p} points", lostN: "{n} bet(s) lost",
       played: "Matches played. A new round is ready.",
       footer: "A&K Bet demo · virtual points, no payments and no cash prizes · 18+ · Play responsibly",
@@ -204,12 +205,12 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     },
     it: {
       football: "Calcio", myBets: "Le mie scommesse", results: "Risultati", balance: "Saldo", bonus: "Bonus +100", bonusTitle: "+100 punti ogni giorno",
-      notice: "Demo con punti virtuali, niente soldi veri. Premi <b>Gioca le partite</b> per vedere come finiscono le tue scommesse.", play: "Gioca le partite",
+      notice: "Demo con punti virtuali, niente soldi veri. Le partite si giocano automaticamente all'orario d'inizio e ogni giorno ne arrivano di nuove. <b>Gioca ora</b> le gioca tutte subito.", play: "Gioca ora", autoPlayed: "{n} partite sono terminate. Sono state aggiunte nuove partite.",
       all: "Tutte", match: "Partita", slip: "Schedina", odds: "Quota", stake: "Importo", potential: "Vincita potenziale", payout: "Pagamento",
       single: "Singola", acc: "Multipla ({n})", place: "Scommetti", insufficient: "Saldo insufficiente", clear: "Svuota schedina", remove: "Rimuovi",
-      tap: "Tocca una quota per aggiungerla alla schedina.", noOpen: "Nessuna partita aperta. Premi “Gioca le partite” per una nuova giornata.",
+      tap: "Tocca una quota per aggiungerla alla schedina.", noOpen: "Nessuna partita aperta. Premi “Gioca ora” per una nuova giornata.",
       bets: "Scommesse", won: "Vinte", staked: "Giocato", pointsWon: "Punti vinti", noBets: "Non hai ancora piazzato scommesse.",
-      noResults: "Ancora nessun risultato. Premi “Gioca le partite”.", minStake: "L'importo minimo è 1",
+      noResults: "Ancora nessun risultato. Premi “Gioca ora”.", minStake: "L'importo minimo è 1",
       placed: "Scommessa #{id} piazzata. Vincita potenziale: {win}", youWon: "Hai vinto {n} scommessa/e: +{p} punti", lostN: "{n} scommessa/e persa/e",
       played: "Partite giocate. Una nuova giornata è pronta.",
       footer: "A&K Bet demo · punti virtuali, nessun pagamento e nessuna vincita in denaro · 18+ · Gioca responsabilmente",
@@ -222,12 +223,12 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     },
     de: {
       football: "Fußball", myBets: "Meine Wetten", results: "Ergebnisse", balance: "Guthaben", bonus: "Bonus +100", bonusTitle: "+100 Punkte jeden Tag",
-      notice: "Demo mit virtuellen Punkten, kein Echtgeld. Tippe auf <b>Spiele austragen</b>, um zu sehen, wie deine Wetten ausgehen.", play: "Spiele austragen",
+      notice: "Demo mit virtuellen Punkten, kein Echtgeld. Spiele werden zur Anstoßzeit automatisch ausgetragen, und jeden Tag kommen neue hinzu. <b>Jetzt spielen</b> trägt alle sofort aus.", play: "Jetzt spielen", autoPlayed: "{n} Spiele sind beendet. Neue Spiele wurden hinzugefügt.",
       all: "Alle", match: "Spiel", slip: "Wettschein", odds: "Quote", stake: "Einsatz", potential: "Möglicher Gewinn", payout: "Auszahlung",
       single: "Einzelwette", acc: "Kombiwette ({n})", place: "Wette platzieren", insufficient: "Guthaben reicht nicht", clear: "Wettschein leeren", remove: "Entfernen",
-      tap: "Tippe auf eine Quote, um sie zum Wettschein hinzuzufügen.", noOpen: "Keine offenen Spiele. Tippe auf „Spiele austragen“ für einen neuen Spieltag.",
+      tap: "Tippe auf eine Quote, um sie zum Wettschein hinzuzufügen.", noOpen: "Keine offenen Spiele. Tippe auf „Jetzt spielen“ für einen neuen Spieltag.",
       bets: "Wetten", won: "Gewonnen", staked: "Eingesetzt", pointsWon: "Gewonnene Punkte", noBets: "Du hast noch keine Wetten platziert.",
-      noResults: "Noch keine Ergebnisse. Tippe auf „Spiele austragen“.", minStake: "Mindesteinsatz ist 1",
+      noResults: "Noch keine Ergebnisse. Tippe auf „Jetzt spielen“.", minStake: "Mindesteinsatz ist 1",
       placed: "Wette #{id} platziert. Möglicher Gewinn: {win}", youWon: "{n} Wette(n) gewonnen: +{p} Punkte", lostN: "{n} Wette(n) verloren",
       played: "Spiele ausgetragen. Ein neuer Spieltag ist bereit.",
       footer: "A&K Bet Demo · virtuelle Punkte, keine Zahlungen und keine Geldgewinne · 18+ · Spiele verantwortungsvoll",
@@ -277,8 +278,9 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     for (const [league, teams] of Object.entries(LEAGUES)) {
       const names = Object.keys(teams).sort(() => Math.random() - .5);
       for (let i = 0; i < names.length; i += 2) {
-        const d = new Date(); d.setDate(d.getDate() + 1 + Math.floor(Math.random() * 4));
+        const d = new Date(); d.setDate(d.getDate() + Math.floor(Math.random() * 4));
         d.setHours(slots[Math.floor(Math.random() * slots.length)], Math.random() < .5 ? 0 : 30, 0, 0);
+        if (d.getTime() < Date.now() + 30 * 60000) d.setDate(d.getDate() + 1);
         const e = xg(teams[names[i]], teams[names[i + 1]]);
         S.matches.push({ id: S.nextId++, league, home: names[i], away: names[i + 1], kickoff: d.toISOString(), xh: e.h, xa: e.a, odds: oddsFor(e.h, e.a), status: "open" });
       }
@@ -292,7 +294,7 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   }
   if (!S) { S = { balance: 1000, matches: [], bets: [], nextId: 1, nextBet: 1, lastBonus: null }; newRound(); save(); }
 
-  let league = "all", marketId = "1X2", picks = [], stake = "10", msg = null, view = "book", banner = null;
+  let league = "all", marketId = "1X2", picks = [], stake = "10", msg = null, view = "book", banner = null, flash = null;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const money = (n) => { const [i, d] = Math.abs(n).toFixed(2).split("."); const s = lang === "en" ? [",", "."] : [".", ","]; return (n < 0 ? "-" : "") + i.replace(/\B(?=(\d{3})+(?!\d))/g, s[0]) + s[1] + d; };
@@ -310,6 +312,7 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     document.querySelectorAll("#nav button").forEach((b) => { b.textContent = nav[b.dataset.view]; b.setAttribute("aria-current", b.dataset.view === view); });
     $("balLabel").textContent = t.balance; $("balance").textContent = money(S.balance);
     $("bonus").textContent = t.bonus; $("bonus").title = t.bonusTitle; $("bonus").hidden = S.lastBonus === today();
+    $("flash").innerHTML = flash ? `<p class="msg ${flash.ok ? "ok" : "err"}">${esc(flash.ok || flash.err)}</p>` : "";
     $("notice").innerHTML = t.notice; $("playAll").textContent = t.play; $("slipTitle").textContent = t.slip; $("footer").textContent = t.footer;
   }
 
@@ -384,9 +387,10 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     save();
   }
 
-  function playAll() {
-    let wonCount = 0, lostCount = 0, paid = 0;
-    for (const m of S.matches) if (m.status === "open") { m.hg = samplePois(m.xh); m.ag = samplePois(m.xa); m.status = "done"; }
+  // Plays every open match that `pred` selects, settles bets, tops the list up with new matches.
+  function settle(pred) {
+    let wonCount = 0, lostCount = 0, paid = 0, played = 0;
+    for (const m of S.matches) if (m.status === "open" && pred(m)) { m.hg = samplePois(m.xh); m.ag = samplePois(m.xa); m.status = "done"; played++; }
     for (const b of S.bets) {
       if (b.status !== "open") continue;
       for (const s of b.sels) { const m = matchById(s.m); if (m.status === "done") s.r = wins(s.s, m.hg, m.ag) ? "won" : "lost"; }
@@ -398,7 +402,27 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     const done = S.matches.filter((m) => m.status === "done" && !used.has(m.id));
     const dropIds = new Set(done.slice(0, Math.max(0, done.length - 120)).map((m) => m.id));
     S.matches = S.matches.filter((m) => !dropIds.has(m.id));
-    picks = []; msg = null; newRound(); save();
+    if (S.matches.filter((m) => m.status === "open").length < 16) newRound();
+    if (played) picks = picks.filter((p) => matchById(p.m)?.status === "open");
+    save();
+    return { wonCount, lostCount, paid, played };
+  }
+  function outcome(r) {
+    return r.wonCount ? { ok: fill(t.youWon, { n: r.wonCount, p: money(r.paid) }) + (r.lostCount ? " · " + fill(t.lostN, { n: r.lostCount }) : "") }
+      : r.lostCount ? { err: fill(t.lostN, { n: r.lostCount }) } : null;
+  }
+  // Automatic: matches are played once their kick-off time has passed.
+  function autoUpdate() {
+    const now = new Date().toISOString();
+    const r = settle((m) => m.kickoff <= now);
+    if (!r.played) return;
+    flash = outcome(r) || { ok: fill(t.autoPlayed, { n: r.played }) };
+    render();
+  }
+  function playAll() {
+    const r = settle(() => true);
+    picks = []; msg = null;
+    const { wonCount, lostCount, paid } = r;
     if (wonCount || lostCount) {
       view = "bets";
       banner = wonCount ? { ok: fill(t.youWon, { n: wonCount, p: money(paid) }) + (lostCount ? " · " + fill(t.lostN, { n: lostCount }) : "") } : { err: fill(t.lostN, { n: lostCount }) };
@@ -411,7 +435,7 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   document.addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
     if (b.dataset.lang) { lang = b.dataset.lang; t = T[lang]; try { localStorage.setItem(LANG_KEY, lang); } catch (err) {} msg = null; render(); return; }
-    if (b.dataset.view) { view = b.dataset.view; msg = null; render(); window.scrollTo(0, 0); return; }
+    if (b.dataset.view) { view = b.dataset.view; msg = null; flash = null; render(); window.scrollTo(0, 0); return; }
     if (b.dataset.league) { league = b.dataset.league; renderBook(); return; }
     if (b.dataset.market) { marketId = b.dataset.market; renderBook(); return; }
     if (b.dataset.m) {
@@ -435,6 +459,8 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     $("potential").textContent = money(st * total);
     const btn = $("place"); btn.disabled = st < 1 || st > S.balance; btn.textContent = st > S.balance ? t.insufficient : t.place;
   });
+  autoUpdate();
   render();
+  setInterval(autoUpdate, 60000);
 })();
 </script>

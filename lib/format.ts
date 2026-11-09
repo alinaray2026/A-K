@@ -1,5 +1,5 @@
 const TZ = "Europe/Tirane";
-const DAYS = ["Die", "Hën", "Mar", "Mër", "Enj", "Pre", "Sht"];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function parts(iso: string) {
   const p = new Intl.DateTimeFormat("en-GB", {

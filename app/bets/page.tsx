@@ -4,7 +4,7 @@ import { all } from "@/lib/db";
 import { fmtDateTime, money } from "@/lib/format";
 import { SELECTION_LABEL, type Selection } from "@/lib/odds";
 
-const STATUS: Record<string, string> = { open: "Në pritje", won: "Fituar", lost: "Humbur", void: "Kthyer", pending: "Në pritje" };
+const STATUS: Record<string, string> = { open: "Pending", won: "Won", lost: "Lost", void: "Void", pending: "Pending" };
 
 export default async function Bets() {
   const user = await currentUser();
@@ -17,8 +17,8 @@ export default async function Bets() {
      WHERE b.user_id = ? ORDER BY s.id`, user.id);
   return (
     <>
-      <h1 className="page-title">Bastet e mia</h1>
-      {bets.length === 0 && <p className="card empty">Nuk keni vendosur ende asnjë bast.</p>}
+      <h1 className="page-title">My bets</h1>
+      {bets.length === 0 && <p className="card empty">You haven't placed any bets yet.</p>}
       <div className="bets">
         {bets.map((b) => (
           <article key={b.id} className={`card bet ${b.status}`}>
@@ -37,9 +37,9 @@ export default async function Bets() {
               </div>
             ))}
             <footer>
-              <span>Shuma <b>{money(b.stake)}</b></span>
-              <span>Koef. <b>{b.total_odds.toFixed(2)}</b></span>
-              <span>{b.status === "open" ? "Fitim i mundshëm" : "Pagesa"} <b>{money(b.status === "open" ? b.potential_win : b.payout)}</b></span>
+              <span>Stake <b>{money(b.stake)}</b></span>
+              <span>Odds <b>{b.total_odds.toFixed(2)}</b></span>
+              <span>{b.status === "open" ? "Potential win" : "Payout"} <b>{money(b.status === "open" ? b.potential_win : b.payout)}</b></span>
             </footer>
           </article>
         ))}

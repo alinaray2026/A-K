@@ -2,11 +2,11 @@ import type { DatabaseSync } from "node:sqlite";
 import { expectedGoals, oddsFor } from "./odds.ts";
 
 export const LEAGUES: Record<string, Record<string, number>> = {
-  "Kosovë · Superliga": { Ballkani: 78, Drita: 74, Prishtina: 72, Llapi: 70, Gjilani: 66, Malisheva: 62, Dukagjini: 60, Ferizaj: 58 },
-  "Shqipëri · Abissnet Superiore": { Egnatia: 76, Partizani: 74, Tirana: 72, Vllaznia: 71, "Dinamo City": 68, Teuta: 66, Elbasani: 61, Bylis: 60 },
-  "Angli · Premier League": { Arsenal: 92, "Manchester City": 92, Liverpool: 91, Chelsea: 86, "Newcastle Utd": 84, "Aston Villa": 82, Brighton: 79, Everton: 74 },
-  "Itali · Serie A": { Inter: 90, Napoli: 87, Juventus: 86, Milan: 84, Atalanta: 84, Roma: 81, Lazio: 80, Bologna: 78 },
-  "Spanjë · La Liga": { "Real Madrid": 93, Barcelona: 92, "Atlético Madrid": 87, "Athletic Club": 82, Villarreal: 81, "Real Sociedad": 79, Betis: 79, Sevilla: 76 },
+  "Kosovo · Superliga": { Ballkani: 78, Drita: 74, Prishtina: 72, Llapi: 70, Gjilani: 66, Malisheva: 62, Dukagjini: 60, Ferizaj: 58 },
+  "Albania · Abissnet Superiore": { Egnatia: 76, Partizani: 74, Tirana: 72, Vllaznia: 71, "Dinamo City": 68, Teuta: 66, Elbasani: 61, Bylis: 60 },
+  "England · Premier League": { Arsenal: 92, "Manchester City": 92, Liverpool: 91, Chelsea: 86, "Newcastle Utd": 84, "Aston Villa": 82, Brighton: 79, Everton: 74 },
+  "Italy · Serie A": { Inter: 90, Napoli: 87, Juventus: 86, Milan: 84, Atalanta: 84, Roma: 81, Lazio: 80, Bologna: 78 },
+  "Spain · La Liga": { "Real Madrid": 93, Barcelona: 92, "Atlético Madrid": 87, "Athletic Club": 82, Villarreal: 81, "Real Sociedad": 79, Betis: 79, Sevilla: 76 },
 };
 
 function shuffle<T>(a: T[]) {
@@ -17,7 +17,7 @@ function shuffle<T>(a: T[]) {
   return a;
 }
 
-/** Krijon një xhiro ndeshjesh për çdo ligë, në ditët e ardhshme. */
+/** Creates one round of matches per league over the coming days. */
 export function generateRound(db: DatabaseSync) {
   const insM = db.prepare(
     "INSERT INTO matches (league, home, away, kickoff, home_xg, away_xg) VALUES (?, ?, ?, ?, ?, ?)"

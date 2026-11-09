@@ -133,21 +133,21 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
       A&amp;K <b>Bet</b>
     </div>
     <div class="acct">
-      <button class="btn btn-ghost sm" id="bonus" type="button" title="+100 pikë çdo ditë">Bonus +100</button>
-      <div class="bal"><small>Bilanci</small><b class="num" id="balance">0</b></div>
+      <button class="btn btn-ghost sm" id="bonus" type="button" title="+100 points every day">Bonus +100</button>
+      <div class="bal"><small>Balance</small><b class="num" id="balance">0</b></div>
     </div>
   </div>
   <nav class="sub"><div class="wrap sub-in" id="nav">
-    <button type="button" data-view="book" aria-current="true">Futboll</button>
-    <button type="button" data-view="bets">Bastet e mia</button>
-    <button type="button" data-view="results">Rezultatet</button>
+    <button type="button" data-view="book" aria-current="true">Football</button>
+    <button type="button" data-view="bets">My bets</button>
+    <button type="button" data-view="results">Results</button>
   </div></nav>
 </header>
 
 <main class="wrap">
   <div class="card notice">
-    <span>Demo me pikë virtuale, pa para reale. Shtyp <b>Luaj ndeshjet</b> për të parë rezultatet e basteve.</span>
-    <button class="btn btn-accent sm" id="playAll" type="button">Luaj ndeshjet</button>
+    <span>Demo with virtual points, no real money. Press <b>Play matches</b> to see how your bets end.</span>
+    <button class="btn btn-accent sm" id="playAll" type="button">Play matches</button>
   </div>
 
   <div id="view-book" class="book">
@@ -157,37 +157,37 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
       <div class="card events" id="events"></div>
     </section>
     <aside class="card slip" id="slip">
-      <button class="slip-head" id="slipHead" type="button"><span>Kuponi <span class="badge num" id="count">0</span></span><span class="num" id="headOdds"></span></button>
+      <button class="slip-head" id="slipHead" type="button"><span>Bet slip <span class="badge num" id="count">0</span></span><span class="num" id="headOdds"></span></button>
       <div class="slip-body" id="slipBody"></div>
     </aside>
   </div>
 
   <div id="view-bets" class="page" hidden></div>
   <div id="view-results" class="page" hidden></div>
-  <footer class="foot">A&amp;K Bet demo · pikë virtuale, pa pagesa dhe pa fitime në para · 18+ · Luaj me përgjegjësi</footer>
+  <footer class="foot">A&amp;K Bet demo · virtual points, no payments and no cash prizes · 18+ · Play responsibly</footer>
 </main>
 
 <script>
 (() => {
   const LEAGUES = {
-    "Kosovë · Superliga": { Ballkani: 78, Drita: 74, Prishtina: 72, Llapi: 70, Gjilani: 66, Malisheva: 62, Dukagjini: 60, Ferizaj: 58 },
-    "Shqipëri · Abissnet Superiore": { Egnatia: 76, Partizani: 74, Tirana: 72, Vllaznia: 71, "Dinamo City": 68, Teuta: 66, Elbasani: 61, Bylis: 60 },
-    "Angli · Premier League": { Arsenal: 92, "Manchester City": 92, Liverpool: 91, Chelsea: 86, "Newcastle Utd": 84, "Aston Villa": 82, Brighton: 79, Everton: 74 },
-    "Itali · Serie A": { Inter: 90, Napoli: 87, Juventus: 86, Milan: 84, Atalanta: 84, Roma: 81, Lazio: 80, Bologna: 78 },
-    "Spanjë · La Liga": { "Real Madrid": 93, Barcelona: 92, "Atlético Madrid": 87, "Athletic Club": 82, Villarreal: 81, "Real Sociedad": 79, Betis: 79, Sevilla: 76 },
+    "Kosovo · Superliga": { Ballkani: 78, Drita: 74, Prishtina: 72, Llapi: 70, Gjilani: 66, Malisheva: 62, Dukagjini: 60, Ferizaj: 58 },
+    "Albania · Abissnet Superiore": { Egnatia: 76, Partizani: 74, Tirana: 72, Vllaznia: 71, "Dinamo City": 68, Teuta: 66, Elbasani: 61, Bylis: 60 },
+    "England · Premier League": { Arsenal: 92, "Manchester City": 92, Liverpool: 91, Chelsea: 86, "Newcastle Utd": 84, "Aston Villa": 82, Brighton: 79, Everton: 74 },
+    "Italy · Serie A": { Inter: 90, Napoli: 87, Juventus: 86, Milan: 84, Atalanta: 84, Roma: 81, Lazio: 80, Bologna: 78 },
+    "Spain · La Liga": { "Real Madrid": 93, Barcelona: 92, "Atlético Madrid": 87, "Athletic Club": 82, Villarreal: 81, "Real Sociedad": 79, Betis: 79, Sevilla: 76 },
   };
   const MARKETS = [
     { id: "1X2", label: "1X2", sels: ["1", "X", "2"], heads: ["1", "X", "2"] },
-    { id: "OU", label: "Mbi/Nën 2.5", sels: ["O", "U"], heads: ["Mbi", "Nën"] },
+    { id: "OU", label: "Over/Under 2.5", sels: ["O", "U"], heads: ["Over", "Under"] },
     { id: "BTTS", label: "GG/NG", sels: ["GG", "NG"], heads: ["GG", "NG"] },
   ];
-  const SEL_NAME = { "1": "Fiton vendasi (1)", X: "Barazim (X)", "2": "Fiton mysafiri (2)", O: "Mbi 2.5 gola", U: "Nën 2.5 gola", GG: "Shënojnë të dyja (GG)", NG: "Jo të dyja (NG)" };
-  const SEL_SHORT = { "1": "1", X: "X", "2": "2", O: "Mbi 2.5", U: "Nën 2.5", GG: "GG", NG: "NG" };
-  const STATUS = { open: "Në pritje", won: "Fituar", lost: "Humbur", void: "Kthyer" };
-  const DAYS = ["Die", "Hën", "Mar", "Mër", "Enj", "Pre", "Sht"];
+  const SEL_NAME = { "1": "Home win (1)", X: "Draw (X)", "2": "Away win (2)", O: "Over 2.5 goals", U: "Under 2.5 goals", GG: "Both teams score (GG)", NG: "Not both score (NG)" };
+  const SEL_SHORT = { "1": "1", X: "X", "2": "2", O: "Over 2.5", U: "Under 2.5", GG: "GG", NG: "NG" };
+  const STATUS = { open: "Pending", won: "Won", lost: "Lost", void: "Void" };
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const KEY = "golbet-demo-v1";
 
-  // ---- modeli i koeficientëve (Poisson, marzh 6%) ----
+  // ---- price model (Poisson, 6% margin) ----
   const r2 = (n) => Math.round(n * 100) / 100;
   const pois = (k, l) => { let f = 1; for (let i = 2; i <= k; i++) f *= i; return Math.exp(-l) * l ** k / f; };
   function xg(hr, ar) { const d = (hr - ar) / 50; return { h: r2(1.35 * Math.exp(d) * 1.12), a: r2(1.35 * Math.exp(-d) / 1.12) }; }
@@ -204,7 +204,7 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   const wins = (s, h, a) => ({ "1": h > a, X: h === a, "2": h < a, O: h + a > 2.5, U: h + a < 2.5, GG: h > 0 && a > 0, NG: h === 0 || a === 0 })[s];
   function samplePois(l) { const L = Math.exp(-l); let k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1; }
 
-  // ---- gjendja ----
+  // ---- state ----
   let S;
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   function load() { try { const v = JSON.parse(localStorage.getItem(KEY)); if (v && v.matches) return v; } catch (e) {} return null; }
@@ -222,6 +222,10 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     S.matches.sort((a, b) => a.kickoff.localeCompare(b.kickoff));
   }
   S = load();
+  if (S) { // older saves used Albanian league names
+    const OLD = { "Kosovë · Superliga": "Kosovo · Superliga", "Shqipëri · Abissnet Superiore": "Albania · Abissnet Superiore", "Angli · Premier League": "England · Premier League", "Itali · Serie A": "Italy · Serie A", "Spanjë · La Liga": "Spain · La Liga" };
+    for (const m of S.matches) if (OLD[m.league]) m.league = OLD[m.league];
+  }
   if (!S) { S = { balance: 1000, matches: [], bets: [], nextId: 1, nextBet: 1, lastBonus: null }; newRound(); save(); }
 
   let league = "all", market = MARKETS[0], picks = [], stake = "10", msg = null, view = "book";
@@ -241,15 +245,15 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
   function renderBook() {
     const open = S.matches.filter((m) => m.status === "open");
     const leagues = [...new Set(open.map((m) => m.league))];
-    $("chips").innerHTML = [["all", "Të gjitha"], ...leagues.map((l) => [l, l])]
+    $("chips").innerHTML = [["all", "All"], ...leagues.map((l) => [l, l])]
       .map(([v, t]) => `<button type="button" class="chip" data-league="${esc(v)}" aria-pressed="${league === v}">${esc(t)}</button>`).join("");
     $("tabs").innerHTML = MARKETS.map((mk) => `<button type="button" class="tab" data-market="${mk.id}" aria-pressed="${market.id === mk.id}">${mk.label}</button>`).join("");
     const shown = league === "all" ? open : open.filter((m) => m.league === league);
     const cols = `cols-${market.sels.length}`;
-    $("events").innerHTML = `<div class="ev-head"><span>Ndeshja</span><div class="odds ${cols}">${market.heads.map((h) => `<span>${h}</span>`).join("")}</div></div>` +
+    $("events").innerHTML = `<div class="ev-head"><span>Match</span><div class="odds ${cols}">${market.heads.map((h) => `<span>${h}</span>`).join("")}</div></div>` +
       (shown.length ? shown.map((m) => `<div class="ev"><div class="ev-info"><div class="ev-meta">${fmt(m.kickoff)} · ${esc(m.league)}</div><div class="ev-team">${esc(m.home)}</div><div class="ev-team">${esc(m.away)}</div></div>
         <div class="odds ${cols}">${market.sels.map((s) => `<button type="button" class="odd" data-m="${m.id}" data-s="${s}" aria-pressed="${picks.some((p) => p.m === m.id && p.s === s)}" aria-label="${esc(m.home)} – ${esc(m.away)}: ${SEL_NAME[s]} ${m.odds[s].toFixed(2)}">${m.odds[s].toFixed(2)}</button>`).join("")}</div></div>`).join("")
-      : `<p class="empty">Nuk ka ndeshje të hapura. Shtyp “Luaj ndeshjet” për një xhiro të re.</p>`);
+      : `<p class="empty">No open matches. Press “Play matches” for a new round.</p>`);
     renderSlip();
   }
 
@@ -257,35 +261,35 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1);
     const st = Number(stake) || 0;
     $("count").textContent = picks.length;
-    $("headOdds").textContent = picks.length ? `Koef. ${total.toFixed(2)}` : "";
+    $("headOdds").textContent = picks.length ? `Odds ${total.toFixed(2)}` : "";
     const m = msg ? `<p class="msg ${msg.ok ? "ok" : "err"}">${esc(msg.ok || msg.err)}</p>` : "";
-    if (!picks.length) { $("slipBody").innerHTML = `<p class="empty">Kliko një koeficient për ta shtuar në kupon.</p>${m}`; return; }
-    $("slipBody").innerHTML = picks.map((p) => { const mt = matchById(p.m); return `<div class="pick"><div><div class="pick-sel">${SEL_NAME[p.s]}</div><div class="muted small">${esc(mt.home)} – ${esc(mt.away)}</div></div><b class="num">${mt.odds[p.s].toFixed(2)}</b><button type="button" class="x" data-remove="${p.m}" aria-label="Hiq">×</button></div>`; }).join("") +
-      `<div class="row"><span>${picks.length > 1 ? `Kombinim (${picks.length})` : "Tek"}</span><b class="num">${total.toFixed(2)}</b></div>
-       <label class="stake" for="stake"><span>Shuma</span><input id="stake" type="number" min="1" step="1" inputmode="decimal" value="${esc(stake)}"></label>
+    if (!picks.length) { $("slipBody").innerHTML = `<p class="empty">Tap a price to add it to your bet slip.</p>${m}`; return; }
+    $("slipBody").innerHTML = picks.map((p) => { const mt = matchById(p.m); return `<div class="pick"><div><div class="pick-sel">${SEL_NAME[p.s]}</div><div class="muted small">${esc(mt.home)} – ${esc(mt.away)}</div></div><b class="num">${mt.odds[p.s].toFixed(2)}</b><button type="button" class="x" data-remove="${p.m}" aria-label="Remove">×</button></div>`; }).join("") +
+      `<div class="row"><span>${picks.length > 1 ? `Accumulator (${picks.length})` : "Single"}</span><b class="num">${total.toFixed(2)}</b></div>
+       <label class="stake" for="stake"><span>Stake</span><input id="stake" type="number" min="1" step="1" inputmode="decimal" value="${esc(stake)}"></label>
        <div class="quick">${[5, 10, 50, 100].map((v) => `<button type="button" data-stake="${v}">${v}</button>`).join("")}</div>
-       <div class="row"><span>Fitimi i mundshëm</span><b class="win num" id="potential">${money(st * total)}</b></div>
-       <button type="button" class="btn btn-accent block" id="place" ${st < 1 || st > S.balance ? "disabled" : ""}>${st > S.balance ? "Bilanc i pamjaftueshëm" : "Vendos bastin"}</button>
-       <button type="button" class="linkbtn" id="clear">Pastro kuponin</button>${m}`;
+       <div class="row"><span>Potential win</span><b class="win num" id="potential">${money(st * total)}</b></div>
+       <button type="button" class="btn btn-accent block" id="place" ${st < 1 || st > S.balance ? "disabled" : ""}>${st > S.balance ? "Insufficient balance" : "Place bet"}</button>
+       <button type="button" class="linkbtn" id="clear">Clear slip</button>${m}`;
   }
 
   function renderBets() {
     const won = S.bets.filter((b) => b.status === "won");
     const staked = S.bets.reduce((s, b) => s + b.stake, 0);
     const paid = S.bets.reduce((s, b) => s + (b.payout || 0), 0);
-    $("view-bets").innerHTML = `<h1>Bastet e mia</h1>
-      <div class="stats"><div class="card stat"><small>Baste</small><b>${S.bets.length}</b></div><div class="card stat"><small>Fituar</small><b>${won.length}</b></div>
-      <div class="card stat"><small>Luajtur</small><b>${money(staked)}</b></div><div class="card stat"><small>Fituar në pikë</small><b>${money(paid)}</b></div></div>` +
+    $("view-bets").innerHTML = `<h1>My bets</h1>
+      <div class="stats"><div class="card stat"><small>Bets</small><b>${S.bets.length}</b></div><div class="card stat"><small>Won</small><b>${won.length}</b></div>
+      <div class="card stat"><small>Staked</small><b>${money(staked)}</b></div><div class="card stat"><small>Points won</small><b>${money(paid)}</b></div></div>` +
       (S.bets.length ? `<div class="bets">${S.bets.slice().reverse().map((b) => `<article class="card bet ${b.status}">
         <div class="bet-top"><span>#${b.id} · ${fmt(b.at)}</span><span class="tag ${b.status}">${STATUS[b.status]}</span></div>
         ${b.sels.map((s) => { const m = matchById(s.m); return `<div class="bsel"><span class="dot ${s.r}"></span><div><div>${esc(m.home)} – ${esc(m.away)} ${m.status === "done" ? `<b>(${m.hg}–${m.ag})</b>` : ""}</div><div class="muted small">${SEL_SHORT[s.s]} · ${fmt(m.kickoff)}</div></div><b class="num">${s.price.toFixed(2)}</b></div>`; }).join("")}
-        <div class="bet-foot"><span>Shuma <b class="num">${money(b.stake)}</b></span><span>Koef. <b class="num">${b.odds.toFixed(2)}</b></span><span>${b.status === "open" ? "Fitim i mundshëm" : "Pagesa"} <b class="num">${money(b.status === "open" ? b.potential : b.payout)}</b></span></div>
-      </article>`).join("")}</div>` : `<p class="card empty">Nuk ke vendosur ende asnjë bast.</p>`);
+        <div class="bet-foot"><span>Stake <b class="num">${money(b.stake)}</b></span><span>Odds <b class="num">${b.odds.toFixed(2)}</b></span><span>${b.status === "open" ? "Potential win" : "Payout"} <b class="num">${money(b.status === "open" ? b.potential : b.payout)}</b></span></div>
+      </article>`).join("")}</div>` : `<p class="card empty">You haven't placed any bets yet.</p>`);
   }
 
   function renderResults() {
     const done = S.matches.filter((m) => m.status === "done").slice(-40).reverse();
-    $("view-results").innerHTML = `<h1>Rezultatet</h1>` + (done.length ? `<div class="card results">${done.map((m) => `<div class="res"><span class="muted small">${esc(m.league)} · ${fmt(m.kickoff)}</span><span>${esc(m.home)} <b>${m.hg} – ${m.ag}</b> ${esc(m.away)}</span></div>`).join("")}</div>` : `<p class="card empty">Ende pa rezultate. Shtyp “Luaj ndeshjet”.</p>`);
+    $("view-results").innerHTML = `<h1>Results</h1>` + (done.length ? `<div class="card results">${done.map((m) => `<div class="res"><span class="muted small">${esc(m.league)} · ${fmt(m.kickoff)}</span><span>${esc(m.home)} <b>${m.hg} – ${m.ag}</b> ${esc(m.away)}</span></div>`).join("")}</div>` : `<p class="card empty">No results yet. Press “Play matches”.</p>`);
   }
 
   function render() {
@@ -297,13 +301,13 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
 
   function place() {
     const st = r2(Number(stake));
-    if (!(st >= 1)) { msg = { err: "Shuma minimale është 1" }; return; }
-    if (st > S.balance) { msg = { err: "Bilanc i pamjaftueshëm" }; return; }
+    if (!(st >= 1)) { msg = { err: "Minimum stake is 1" }; return; }
+    if (st > S.balance) { msg = { err: "Insufficient balance" }; return; }
     const sels = picks.map((p) => ({ m: p.m, s: p.s, price: matchById(p.m).odds[p.s], r: "pending" }));
     const odds = r2(sels.reduce((x, s) => x * s.price, 1));
     const bet = { id: S.nextBet++, stake: st, odds, potential: r2(st * odds), payout: 0, status: "open", at: new Date().toISOString(), sels };
     S.balance = r2(S.balance - st); S.bets.push(bet); picks = [];
-    msg = { ok: `Basti #${bet.id} u vendos. Fitimi i mundshëm: ${money(bet.potential)}` };
+    msg = { ok: `Bet #${bet.id} placed. Potential win: ${money(bet.potential)}` };
     save();
   }
 
@@ -318,11 +322,11 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     }
     S.matches = S.matches.filter((m) => m.status === "open" || S.bets.some((b) => b.sels.some((s) => s.m === m.id)) || true).slice(-200);
     picks = []; newRound(); save();
-    msg = (wonCount || lostCount) ? (wonCount ? { ok: `${wonCount} bast(e) fituan: +${money(paid)} pikë. ${lostCount ? lostCount + " humbën." : ""}` } : { err: `${lostCount} bast(e) humbën. Provo përsëri në xhiron e re.` }) : { ok: "Ndeshjet u luajtën. Xhiro e re është gati." };
+    msg = (wonCount || lostCount) ? (wonCount ? { ok: `${wonCount} bet(s) won: +${money(paid)} points. ${lostCount ? lostCount + " lost." : ""}` } : { err: `${lostCount} bet(s) lost. Try again in the new round.` }) : { ok: "Matches played. A new round is ready." };
     view = (wonCount || lostCount) ? "bets" : "results";
     if (view === "bets") setTimeout(() => { msg = null; }, 0);
     render();
-    if (view === "bets") { const p = document.createElement("p"); p.className = "msg " + (wonCount ? "ok" : "err"); p.textContent = wonCount ? `Fitove ${wonCount} bast(e): +${money(paid)} pikë` : `${lostCount} bast(e) humbën`; $("view-bets").insertBefore(p, $("view-bets").children[1]); }
+    if (view === "bets") { const p = document.createElement("p"); p.className = "msg " + (wonCount ? "ok" : "err"); p.textContent = wonCount ? `You won ${wonCount} bet(s): +${money(paid)} points` : `${lostCount} bet(s) lost`; $("view-bets").insertBefore(p, $("view-bets").children[1]); }
     window.scrollTo(0, 0);
   }
 
@@ -350,7 +354,7 @@ footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-
     stake = e.target.value;
     const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1), st = Number(stake) || 0;
     $("potential").textContent = money(st * total);
-    const btn = $("place"); btn.disabled = st < 1 || st > S.balance; btn.textContent = st > S.balance ? "Bilanc i pamjaftueshëm" : "Vendos bastin";
+    const btn = $("place"); btn.disabled = st < 1 || st > S.balance; btn.textContent = st > S.balance ? "Insufficient balance" : "Place bet";
   });
   render();
 })();

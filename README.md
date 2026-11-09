@@ -1,33 +1,35 @@
-# A&K Bet — platformë demo për baste futbolli
+# A&K Bet — football betting demo
 
-Platformë demo me **pikë virtuale** (pa para reale). Ndërtuar me Next.js 15 + SQLite (`node:sqlite`, pa varësi native).
+A football betting demo with **virtual points** (no real money). Built with Next.js 15 + SQLite (`node:sqlite`, no native dependencies).
 
-## Nisja
+## Getting started
 
 ```bash
 npm install
 npm run dev          # http://localhost:3000
 ```
 
-Për produksion: `npm run build && npm start`. Testet: `npm test`.
+Production: `npm run build && npm start`. Tests: `npm test`.
 
-Kërkon Node.js 22.13+ (për `node:sqlite`). Databaza krijohet automatikisht te `data/bast.db`
-me ndeshje shembull. Për ta rinisur nga zero, fshini dosjen `data/`.
+Requires Node.js 22.13+ (for `node:sqlite`). The database is created automatically at `data/bast.db`
+with sample matches. Delete the `data/` folder to start over.
 
-**Admini:** `admin` / `admin123` (ndryshojeni me `ADMIN_PASSWORD=... ` para nisjes së parë).
+**Admin:** `admin` / `admin123` (set `ADMIN_PASSWORD=...` before the first start to change it).
 
-## Çfarë ka
+`akbet-demo.html` is a standalone single-page version that runs in the browser with no server.
 
-- Lista e ndeshjeve sipas ligës, me tregjet **1X2**, **Mbi/Nën 2.5** dhe **GG/NG**
-- Kupon basti: tek ose kombinim (deri në 20 zgjedhje, një për ndeshje), shuma të shpejta
-- Llogari me regjistrim/hyrje, 1,000 pikë fillestare + bonus ditor 100 pikë
-- Bastet e mia (në pritje / fituar / humbur / kthyer) dhe renditja e lojtarëve
-- Paneli i adminit: shto ndeshje (koeficientët llogariten vetë nga vlerësimi i ekipeve),
-  vendos rezultatin, simulo rezultatin, anulo ndeshjen, gjenero xhiro të re
+## Features
 
-## Si funksionon
+- Matches by league with **1X2**, **Over/Under 2.5** and **GG/NG** markets
+- Bet slip: single or accumulator (up to 20 selections, one per match), quick stakes
+- Sign up / log in, 1,000 starting points + 100-point daily bonus
+- My bets (pending / won / lost / void) and a leaderboard
+- Admin panel: add matches (prices calculated from team ratings), enter scores,
+  simulate scores, cancel matches, generate a new round
 
-- `lib/odds.ts` — modeli Poisson: vlerësimet → golat e pritur → probabilitetet → koeficientët (marzh 6%)
-- `lib/bets.ts` — vendosja e bastit në transaksion; koeficientët merren nga serveri, jo nga klienti
-- `lib/settle.ts` — shlyerja: një zgjedhje e humbur = kupon i humbur; zgjedhjet e anuluara llogariten 1.00
-- `app/actions.ts` — server actions për hyrjen, bastet dhe adminin
+## How it works
+
+- `lib/odds.ts` — Poisson model: ratings → expected goals → probabilities → prices (6% margin)
+- `lib/bets.ts` — places bets in a transaction; prices come from the server, never the client
+- `lib/settle.ts` — settlement: one lost leg loses the slip; cancelled legs count as 1.00
+- `app/actions.ts` — server actions for auth, betting and admin

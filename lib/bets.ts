@@ -7,30 +7,30 @@ export const MAX_WIN = 100000;
 
 export type SlipItem = { matchId: number; selection: string };
 
-/** Vendos bastin; koeficientët merren gjithmonë nga databaza, jo nga klienti. */
+/** Places a bet; prices always come from the database, never from the client. */
 export function placeBet(userId: number, items: SlipItem[], stakeRaw: number) {
   const stake = round2(Number(stakeRaw));
-  if (!Number.isFinite(stake) || stake < MIN_STAKE) throw new Error(`Shuma minimale është ${MIN_STAKE}`);
-  if (!Array.isArray(items) || items.length === 0) throw new Error("Kuponi është bosh");
-  if (items.length > MAX_SELECTIONS) throw new Error(`Maksimumi ${MAX_SELECTIONS} zgjedhje`);
+  if (!Number.isFinite(stake) || stake < MIN_STAKE) throw new Error(`Minimum stake is ${MIN_STAKE}`);
+  if (!Array.isArray(items) || items.length === 0) throw new Error("Bet slip is empty");
+  if (items.length > MAX_SELECTIONS) throw new Error(`Maximum ${MAX_SELECTIONS} selections`);
   const ids = new Set<number>();
   for (const it of items) {
-    if (!SELECTIONS.includes(it.selection as Selection)) throw new Error("Zgjedhje e pavlefshme");
-    if (ids.has(it.matchId)) throw new Error("Vetëm një zgjedhje për ndeshje");
+    if (!SELECTIONS.includes(it.selection as Selection)) throw new Error("Invalid selection");
+    if (ids.has(it.matchId)) throw new Error("Only one selection per match");
     ids.add(it.matchId);
   }
 
   return tx(() => {
     const user = get<{ balance: number }>("SELECT balance FROM users WHERE id = ?", userId);
-    if (!user) throw new Error("Përdoruesi nuk u gjet");
-    if (user.balance < stake) throw new Error("Bilanc i pamjaftueshëm");
+    if (!user) throw new Error("User not found");
+    if (user.balance < stake) throw new Error("Insufficient balance");
     const now = new Date().toISOString();
     const priced = items.map((it) => {
       const row = get<{ price: number; status: string; kickoff: string }>(
         `SELECT o.price, m.status, m.kickoff FROM odds o JOIN matches m ON m.id = o.match_id
          WHERE o.match_id = ? AND o.selection = ?`, it.matchId, it.selection);
-      if (!row) throw new Error("Ndeshja nuk u gjet");
-      if (row.status !== "scheduled" || row.kickoff <= now) throw new Error("Bastet për këtë ndeshje janë mbyllur");
+      if (!row) throw new Error("Match not found");
+      if (row.status !== "scheduled" || row.kickoff <= now) throw new Error("Betting on this match is closed");
       return { ...it, price: row.price };
     });
     const totalOdds = round2(priced.reduce((p, s) => p * s.price, 1));

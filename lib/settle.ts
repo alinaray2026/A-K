@@ -3,12 +3,12 @@ import { round2, selectionWins, type Selection } from "./odds.ts";
 
 type Sel = { id: number; bet_id: number; selection: Selection; price: number; result: string };
 
-/** Mbyll ndeshjen me rezultat dhe shlyen bastet që preken. */
+/** Finishes a match with a score and settles affected bets. */
 export function settleMatch(matchId: number, hg: number, ag: number) {
   return tx(() => {
     const m = get<{ status: string }>("SELECT status FROM matches WHERE id = ?", matchId);
-    if (!m) throw new Error("Ndeshja nuk u gjet");
-    if (m.status !== "scheduled") throw new Error("Ndeshja është mbyllur tashmë");
+    if (!m) throw new Error("Match not found");
+    if (m.status !== "scheduled") throw new Error("Match is already settled");
     run("UPDATE matches SET status = 'finished', home_goals = ?, away_goals = ? WHERE id = ?", hg, ag, matchId);
     const sels = all<Sel>("SELECT * FROM bet_selections WHERE match_id = ?", matchId);
     for (const s of sels) {
@@ -18,11 +18,11 @@ export function settleMatch(matchId: number, hg: number, ag: number) {
   });
 }
 
-/** Anulon ndeshjen: zgjedhjet bëhen 'void' (koeficient 1.00). */
+/** Cancels a match: its selections become 'void' (price 1.00). */
 export function cancelMatch(matchId: number) {
   return tx(() => {
     const m = get<{ status: string }>("SELECT status FROM matches WHERE id = ?", matchId);
-    if (!m || m.status !== "scheduled") throw new Error("Ndeshja nuk mund të anulohet");
+    if (!m || m.status !== "scheduled") throw new Error("Match cannot be cancelled");
     run("UPDATE matches SET status = 'cancelled' WHERE id = ?", matchId);
     const sels = all<Sel>("SELECT * FROM bet_selections WHERE match_id = ?", matchId);
     run("UPDATE bet_selections SET result = 'void' WHERE match_id = ?", matchId);

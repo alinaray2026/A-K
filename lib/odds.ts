@@ -1,4 +1,4 @@
-// Modeli i koeficientëve: shpërndarje Poisson e golave nga vlerësimi i ekipeve.
+// Price model: Poisson goal distribution from team ratings.
 export const SELECTIONS = ["1", "X", "2", "O", "U", "GG", "NG"] as const;
 export type Selection = (typeof SELECTIONS)[number];
 
@@ -6,8 +6,8 @@ export const SELECTION_LABEL: Record<Selection, string> = {
   "1": "1",
   X: "X",
   "2": "2",
-  O: "Mbi 2.5",
-  U: "Nën 2.5",
+  O: "Over 2.5",
+  U: "Under 2.5",
   GG: "GG",
   NG: "NG",
 };

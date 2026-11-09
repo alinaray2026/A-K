@@ -7,11 +7,11 @@ import { submitBet } from "../actions";
 
 const MARKETS = [
   { id: "1X2", label: "1X2", sels: ["1", "X", "2"], heads: ["1", "X", "2"] },
-  { id: "OU", label: "Mbi/Nën 2.5", sels: ["O", "U"], heads: ["Mbi", "Nën"] },
+  { id: "OU", label: "Over/Under 2.5", sels: ["O", "U"], heads: ["Over", "Under"] },
   { id: "BTTS", label: "GG/NG", sels: ["GG", "NG"], heads: ["GG", "NG"] },
 ] as const;
 
-const SEL_NAME: Record<string, string> = { "1": "Fiton vendasi (1)", X: "Barazim (X)", "2": "Fiton mysafiri (2)", O: "Mbi 2.5 gola", U: "Nën 2.5 gola", GG: "Shënojnë të dyja (GG)", NG: "Jo të dyja (NG)" };
+const SEL_NAME: Record<string, string> = { "1": "Home win (1)", X: "Draw (X)", "2": "Away win (2)", O: "Over 2.5 goals", U: "Under 2.5 goals", GG: "Both teams score (GG)", NG: "Not both score (NG)" };
 
 type Pick = { matchId: number; selection: string; price: number; label: string };
 
@@ -52,7 +52,7 @@ export default function Sportsbook({ matches, loggedIn, balance }: { matches: Op
     <div className="book">
       <section>
         <div className="chips">
-          <button className={league === "all" ? "chip on" : "chip"} onClick={() => setLeague("all")}>Të gjitha</button>
+          <button className={league === "all" ? "chip on" : "chip"} onClick={() => setLeague("all")}>All</button>
           {leagues.map((l) => (
             <button key={l} className={league === l ? "chip on" : "chip"} onClick={() => setLeague(l)}>{l}</button>
           ))}
@@ -65,10 +65,10 @@ export default function Sportsbook({ matches, loggedIn, balance }: { matches: Op
 
         <div className="card events">
           <div className="ev-head">
-            <span>Ndeshja</span>
+            <span>Match</span>
             <div className={`odds cols-${market.sels.length}`}>{market.heads.map((h) => <span key={h}>{h}</span>)}</div>
           </div>
-          {shown.length === 0 && <p className="empty">Nuk ka ndeshje të hapura për momentin.</p>}
+          {shown.length === 0 && <p className="empty">No open matches right now.</p>}
           {shown.map((m) => (
             <div key={m.id} className="ev">
               <div className="ev-info">
@@ -93,12 +93,12 @@ export default function Sportsbook({ matches, loggedIn, balance }: { matches: Op
 
       <aside className={slipOpen ? "slip open" : "slip"}>
         <button className="slip-head" onClick={() => setSlipOpen(!slipOpen)}>
-          <span>Kuponi <b className="badge">{picks.length}</b></span>
-          {picks.length > 0 && <span>Koef. {totalOdds.toFixed(2)}</span>}
+          <span>Bet slip <b className="badge">{picks.length}</b></span>
+          {picks.length > 0 && <span>Odds {totalOdds.toFixed(2)}</span>}
         </button>
         <div className="slip-body">
           {picks.length === 0 ? (
-            <p className="empty">Klikoni një koeficient për ta shtuar në kupon.</p>
+            <p className="empty">Tap a price to add it to your bet slip.</p>
           ) : (
             <>
               {picks.map((p) => (
@@ -108,26 +108,26 @@ export default function Sportsbook({ matches, loggedIn, balance }: { matches: Op
                     <div className="muted small">{p.label}</div>
                   </div>
                   <b>{p.price.toFixed(2)}</b>
-                  <button className="x" aria-label="Hiq" onClick={() => setPicks(picks.filter((q) => q.matchId !== p.matchId))}>×</button>
+                  <button className="x" aria-label="Remove" onClick={() => setPicks(picks.filter((q) => q.matchId !== p.matchId))}>×</button>
                 </div>
               ))}
-              <div className="slip-row"><span>{picks.length > 1 ? `Kombinim (${picks.length})` : "Tek"}</span><b>{totalOdds.toFixed(2)}</b></div>
+              <div className="slip-row"><span>{picks.length > 1 ? `Accumulator (${picks.length})` : "Single"}</span><b>{totalOdds.toFixed(2)}</b></div>
               <label className="stake">
-                <span>Shuma</span>
+                <span>Stake</span>
                 <input type="number" min={1} step="1" inputMode="decimal" value={stake} onChange={(e) => setStake(e.target.value)} />
               </label>
               <div className="quick">
                 {[5, 10, 50, 100].map((v) => <button key={v} onClick={() => setStake(String(v))}>{v}</button>)}
               </div>
-              <div className="slip-row"><span>Fitimi i mundshëm</span><b className="win">{money(potential)}</b></div>
+              <div className="slip-row"><span>Potential win</span><b className="win">{money(potential)}</b></div>
               {loggedIn ? (
                 <button className="btn btn-accent block" disabled={pending || stakeNum <= 0 || stakeNum > balance} onClick={place}>
-                  {pending ? "Duke vendosur…" : stakeNum > balance ? "Bilanc i pamjaftueshëm" : "Vendos bastin"}
+                  {pending ? "Placing…" : stakeNum > balance ? "Insufficient balance" : "Place bet"}
                 </button>
               ) : (
-                <Link className="btn btn-accent block" href="/login">Hyr për të luajtur</Link>
+                <Link className="btn btn-accent block" href="/login">Log in to play</Link>
               )}
-              <button className="link" onClick={() => setPicks([])}>Pastro kuponin</button>
+              <button className="link" onClick={() => setPicks([])}>Clear slip</button>
             </>
           )}
           {msg.ok && <p className="ok">{msg.ok}</p>}

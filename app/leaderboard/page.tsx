@@ -8,10 +8,10 @@ export default function Leaderboard() {
      GROUP BY u.id ORDER BY u.balance DESC LIMIT 50`);
   return (
     <>
-      <h1 className="page-title">Renditja</h1>
+      <h1 className="page-title">Leaderboard</h1>
       <div className="card">
         <table className="table">
-          <thead><tr><th>#</th><th>Lojtari</th><th>Baste</th><th>Fituar</th><th className="r">Pikë</th></tr></thead>
+          <thead><tr><th>#</th><th>Player</th><th>Bets</th><th>Won</th><th className="r">Points</th></tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.username}><td>{i + 1}</td><td>{r.username}</td><td>{r.bets}</td><td>{r.won}</td><td className="r"><b>{money(r.balance)}</b></td></tr>

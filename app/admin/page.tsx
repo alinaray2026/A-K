@@ -11,13 +11,13 @@ export default async function Admin() {
        (SELECT COUNT(DISTINCT s.bet_id) FROM bet_selections s WHERE s.match_id = m.id) AS open_bets
      FROM matches m WHERE m.status = 'scheduled' ORDER BY m.kickoff`);
   const stats = all<{ k: string; v: number }>(
-    `SELECT 'Përdorues' AS k, COUNT(*) AS v FROM users
-     UNION ALL SELECT 'Baste të hapura', COUNT(*) FROM bets WHERE status = 'open'
-     UNION ALL SELECT 'Shuma e luajtur', COALESCE(ROUND(SUM(stake), 2), 0) FROM bets
-     UNION ALL SELECT 'Pagesa', COALESCE(ROUND(SUM(payout), 2), 0) FROM bets`);
+    `SELECT 'Users' AS k, COUNT(*) AS v FROM users
+     UNION ALL SELECT 'Open bets', COUNT(*) FROM bets WHERE status = 'open'
+     UNION ALL SELECT 'Total staked', COALESCE(ROUND(SUM(stake), 2), 0) FROM bets
+     UNION ALL SELECT 'Paid out', COALESCE(ROUND(SUM(payout), 2), 0) FROM bets`);
   return (
     <>
-      <h1 className="page-title">Paneli i adminit</h1>
+      <h1 className="page-title">Admin panel</h1>
       <div className="stats">{stats.map((s) => <div key={s.k} className="card stat"><small>{s.k}</small><b>{s.v}</b></div>)}</div>
       <AdminPanel matches={matches} />
     </>

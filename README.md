@@ -1,4 +1,4 @@
-# GolBet — platformë demo për baste futbolli
+# A&K Bet — platformë demo për baste futbolli
 
 Platformë demo me **pikë virtuale** (pa para reale). Ndërtuar me Next.js 15 + SQLite (`node:sqlite`, pa varësi native).
 

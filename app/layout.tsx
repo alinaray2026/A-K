@@ -6,7 +6,7 @@ import { claimBonus, logout } from "./actions";
 import { money } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "GolBet — Baste futbolli (demo)",
+  title: "A&K Bet — Baste futbolli (demo)",
   description: "Platformë demo për baste futbolli me pikë virtuale",
 };
 
@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <header className="topbar">
           <div className="wrap topbar-in">
-            <Link href="/" className="brand"><span className="brand-ball">⚽</span>Gol<b>Bet</b></Link>
+            <Link href="/" className="brand"><span className="brand-ball">⚽</span>A&amp;K <b>Bet</b></Link>
             <div className="account">
               {user ? (
                 <>

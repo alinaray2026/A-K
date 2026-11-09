@@ -1,0 +1,357 @@
+<title>A&amp;K Bet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: sticky navy header, event list + bet slip (side panel on desktop, bottom sheet on phone) */
+:root {
+  --bg: #eef1f5; --card: #ffffff; --fg: #13202b; --muted: #637282; --line: #dfe5ec;
+  --brand: #0f2a44; --brand-2: #173b5e; --nav-fg: #c9dbec; --accent: #ffc928; --accent-ink: #1b1400;
+  --odd: #f2f5f9; --odd-on: #0f2a44; --odd-on-fg: #ffffff;
+  --win: #178a4c; --lose: #c93c3c; --void: #8a94a0;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1520; --card: #12202e; --fg: #e6edf3; --muted: #8b9aab; --line: #223344;
+  --brand: #081624; --brand-2: #0e2234; --odd: #1a2b3b; --odd-on: #ffc928; --odd-on-fg: #1b1400;
+  --win: #3cc47c; --lose: #ef6b6b; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0b1520; --card: #12202e; --fg: #e6edf3; --muted: #8b9aab; --line: #223344;
+  --brand: #081624; --brand-2: #0e2234; --odd: #1a2b3b; --odd-on: #ffc928; --odd-on-fg: #1b1400;
+  --win: #3cc47c; --lose: #ef6b6b; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.4 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--brand); }
+button { font: inherit; cursor: pointer; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg); width: 100%; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.muted { color: var(--muted); } .small { font-size: 12px; }
+.num { font-variant-numeric: tabular-nums; }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--brand); color: #fff; }
+.top-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; }
+.brand { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: .3px; display: flex; align-items: center; gap: 8px; }
+.brand b { color: var(--accent); }
+.brand svg { width: 24px; height: 24px; }
+.acct { display: flex; align-items: center; gap: 8px; }
+.bal { text-align: right; line-height: 1.1; }
+.bal small { display: block; font-size: 11px; color: var(--nav-fg); }
+.bal b { color: var(--accent); font-family: var(--display); font-size: 20px; }
+nav.sub { background: var(--brand-2); }
+.sub-in { display: flex; gap: 2px; overflow-x: auto; }
+.sub-in button { background: none; border: 0; color: var(--nav-fg); padding: 10px 12px; font-weight: 600; white-space: nowrap; border-bottom: 3px solid transparent; }
+.sub-in button[aria-current="true"] { color: #fff; border-bottom-color: var(--accent); }
+
+.btn { border: 0; border-radius: 8px; padding: 10px 16px; font-weight: 700; display: inline-flex; justify-content: center; align-items: center; gap: 6px; }
+.btn.sm { padding: 7px 12px; font-size: 13px; }
+.btn.block { width: 100%; }
+.btn-accent { background: var(--accent); color: var(--accent-ink); }
+.btn-ghost { background: rgba(140,160,180,.2); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; width: 100%; margin-top: 8px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.notice { margin-top: 14px; padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; font-size: 13px; }
+.book { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; padding-block: 14px 120px; }
+.book > section { min-width: 0; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+.chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 14px; white-space: nowrap; font-size: 13px; font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--brand); color: #fff; border-color: var(--brand); }
+.tabs { display: flex; border-bottom: 2px solid var(--line); margin: 6px 0 12px; }
+.tab { background: none; border: 0; padding: 10px 14px; font-weight: 700; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: var(--display); font-size: 17px; letter-spacing: .3px; }
+.tab[aria-pressed="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.events { overflow: hidden; }
+.ev-head, .ev { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.ev-head { padding-block: 8px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+.ev:last-child { border-bottom: 0; }
+.ev-info { min-width: 0; }
+.ev-meta { font-size: 12px; color: var(--muted); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-team { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.odds { display: grid; gap: 6px; flex-shrink: 0; text-align: center; }
+.cols-3 { grid-template-columns: repeat(3, 62px); } .cols-2 { grid-template-columns: repeat(2, 62px); }
+.odd { background: var(--odd); border: 1px solid var(--line); border-radius: 8px; padding: 12px 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.odd:hover { border-color: var(--accent); }
+.odd[aria-pressed="true"] { background: var(--odd-on); color: var(--odd-on-fg); border-color: var(--odd-on); }
+.empty { color: var(--muted); text-align: center; padding: 22px 12px; margin: 0; }
+
+.slip { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 112px); overflow: hidden; }
+.slip-head { width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--brand); color: #fff; border: 0; padding: 12px 14px; font-weight: 700; font-family: var(--display); font-size: 18px; letter-spacing: .3px; }
+.badge { background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 0 8px; margin-left: 6px; font-size: 13px; }
+.slip-body { padding: 12px 14px; }
+.pick { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.pick-sel { font-weight: 600; }
+.x { background: none; border: 0; color: var(--muted); font-size: 22px; line-height: 1; padding: 0 4px; }
+.row { display: flex; justify-content: space-between; padding: 10px 0; }
+.win { color: var(--win); }
+.stake { display: flex; align-items: center; gap: 10px; } .stake span { color: var(--muted); }
+.quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.quick button { background: var(--odd); border: 1px solid var(--line); border-radius: 6px; padding: 6px 0; }
+.msg { margin: 10px 0 0; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+.msg.ok { background: color-mix(in srgb, var(--win) 15%, transparent); color: var(--win); }
+.msg.err { background: color-mix(in srgb, var(--lose) 15%, transparent); color: var(--lose); }
+
+.page { padding-block: 16px 120px; }
+.page h1 { font-family: var(--display); font-size: 28px; margin: 4px 0 12px; text-wrap: balance; }
+.bets { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 14px; }
+.bet { padding: 14px; border-left: 4px solid var(--accent); }
+.bet.won { border-left-color: var(--win); } .bet.lost { border-left-color: var(--lose); } .bet.void { border-left-color: var(--void); }
+.bet-top, .bet-foot { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.bet-foot { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 6px; }
+.bet-foot b { color: var(--fg); }
+.bsel { display: flex; gap: 10px; align-items: center; padding: 8px 0; }
+.bsel > div { flex: 1; min-width: 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.dot.won { background: var(--win); } .dot.lost { background: var(--lose); } .dot.void { background: var(--void); }
+.tag { font-weight: 700; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--fg); }
+.tag.won { background: var(--win); color: #fff; } .tag.lost { background: var(--lose); color: #fff; } .tag.void { background: var(--void); color: #fff; }
+.results { padding: 4px 14px; }
+.res { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.res:last-child { border-bottom: 0; }
+.res b { font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.stat { padding: 12px 14px; } .stat small { color: var(--muted); display: block; } .stat b { font-family: var(--display); font-size: 26px; font-variant-numeric: tabular-nums; }
+footer.foot { color: var(--muted); font-size: 12px; text-align: center; padding-block: 8px 24px; }
+
+@media (max-width: 860px) {
+  .book { grid-template-columns: minmax(0, 1fr); }
+  .slip { position: fixed; left: 0; right: 0; bottom: 0; top: auto; border-radius: 14px 14px 0 0; z-index: 30; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 -6px 24px rgba(0,0,0,.25); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .slip-head { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .slip-body { display: none; overflow-y: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .slip.open .slip-body { display: block; }
+  .cols-3 { grid-template-columns: repeat(3, 54px); } .cols-2 { grid-template-columns: repeat(2, 60px); }
+  .bal small { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) { .odd { transition: background .12s, border-color .12s; } }
+</style>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#fff"/><path d="M12 7.2l3.3 2.4-1.3 3.9h-4l-1.3-3.9z" fill="#0f2a44"/><path d="M12 2v5.2M15.3 9.6l4.9-1.6M14 13.5l3 4.2M10 13.5l-3 4.2M8.7 9.6L3.8 8" stroke="#0f2a44" stroke-width="1.3" fill="none"/></svg>
+      A&amp;K <b>Bet</b>
+    </div>
+    <div class="acct">
+      <button class="btn btn-ghost sm" id="bonus" type="button" title="+100 pikë çdo ditë">Bonus +100</button>
+      <div class="bal"><small>Bilanci</small><b class="num" id="balance">0</b></div>
+    </div>
+  </div>
+  <nav class="sub"><div class="wrap sub-in" id="nav">
+    <button type="button" data-view="book" aria-current="true">Futboll</button>
+    <button type="button" data-view="bets">Bastet e mia</button>
+    <button type="button" data-view="results">Rezultatet</button>
+  </div></nav>
+</header>
+
+<main class="wrap">
+  <div class="card notice">
+    <span>Demo me pikë virtuale, pa para reale. Shtyp <b>Luaj ndeshjet</b> për të parë rezultatet e basteve.</span>
+    <button class="btn btn-accent sm" id="playAll" type="button">Luaj ndeshjet</button>
+  </div>
+
+  <div id="view-book" class="book">
+    <section>
+      <div class="chips" id="chips"></div>
+      <div class="tabs" id="tabs"></div>
+      <div class="card events" id="events"></div>
+    </section>
+    <aside class="card slip" id="slip">
+      <button class="slip-head" id="slipHead" type="button"><span>Kuponi <span class="badge num" id="count">0</span></span><span class="num" id="headOdds"></span></button>
+      <div class="slip-body" id="slipBody"></div>
+    </aside>
+  </div>
+
+  <div id="view-bets" class="page" hidden></div>
+  <div id="view-results" class="page" hidden></div>
+  <footer class="foot">A&amp;K Bet demo · pikë virtuale, pa pagesa dhe pa fitime në para · 18+ · Luaj me përgjegjësi</footer>
+</main>
+
+<script>
+(() => {
+  const LEAGUES = {
+    "Kosovë · Superliga": { Ballkani: 78, Drita: 74, Prishtina: 72, Llapi: 70, Gjilani: 66, Malisheva: 62, Dukagjini: 60, Ferizaj: 58 },
+    "Shqipëri · Abissnet Superiore": { Egnatia: 76, Partizani: 74, Tirana: 72, Vllaznia: 71, "Dinamo City": 68, Teuta: 66, Elbasani: 61, Bylis: 60 },
+    "Angli · Premier League": { Arsenal: 92, "Manchester City": 92, Liverpool: 91, Chelsea: 86, "Newcastle Utd": 84, "Aston Villa": 82, Brighton: 79, Everton: 74 },
+    "Itali · Serie A": { Inter: 90, Napoli: 87, Juventus: 86, Milan: 84, Atalanta: 84, Roma: 81, Lazio: 80, Bologna: 78 },
+    "Spanjë · La Liga": { "Real Madrid": 93, Barcelona: 92, "Atlético Madrid": 87, "Athletic Club": 82, Villarreal: 81, "Real Sociedad": 79, Betis: 79, Sevilla: 76 },
+  };
+  const MARKETS = [
+    { id: "1X2", label: "1X2", sels: ["1", "X", "2"], heads: ["1", "X", "2"] },
+    { id: "OU", label: "Mbi/Nën 2.5", sels: ["O", "U"], heads: ["Mbi", "Nën"] },
+    { id: "BTTS", label: "GG/NG", sels: ["GG", "NG"], heads: ["GG", "NG"] },
+  ];
+  const SEL_NAME = { "1": "Fiton vendasi (1)", X: "Barazim (X)", "2": "Fiton mysafiri (2)", O: "Mbi 2.5 gola", U: "Nën 2.5 gola", GG: "Shënojnë të dyja (GG)", NG: "Jo të dyja (NG)" };
+  const SEL_SHORT = { "1": "1", X: "X", "2": "2", O: "Mbi 2.5", U: "Nën 2.5", GG: "GG", NG: "NG" };
+  const STATUS = { open: "Në pritje", won: "Fituar", lost: "Humbur", void: "Kthyer" };
+  const DAYS = ["Die", "Hën", "Mar", "Mër", "Enj", "Pre", "Sht"];
+  const KEY = "golbet-demo-v1";
+
+  // ---- modeli i koeficientëve (Poisson, marzh 6%) ----
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const pois = (k, l) => { let f = 1; for (let i = 2; i <= k; i++) f *= i; return Math.exp(-l) * l ** k / f; };
+  function xg(hr, ar) { const d = (hr - ar) / 50; return { h: r2(1.35 * Math.exp(d) * 1.12), a: r2(1.35 * Math.exp(-d) / 1.12) }; }
+  function oddsFor(lh, la) {
+    const p = { "1": 0, X: 0, "2": 0, O: 0, U: 0, GG: 0, NG: 0 };
+    for (let h = 0; h <= 15; h++) for (let a = 0; a <= 15; a++) {
+      const q = pois(h, lh) * pois(a, la);
+      p[h > a ? "1" : h === a ? "X" : "2"] += q;
+      p[h + a > 2.5 ? "O" : "U"] += q;
+      p[h > 0 && a > 0 ? "GG" : "NG"] += q;
+    }
+    const o = {}; for (const k in p) o[k] = Math.max(1.01, r2(1 / (p[k] * 1.06))); return o;
+  }
+  const wins = (s, h, a) => ({ "1": h > a, X: h === a, "2": h < a, O: h + a > 2.5, U: h + a < 2.5, GG: h > 0 && a > 0, NG: h === 0 || a === 0 })[s];
+  function samplePois(l) { const L = Math.exp(-l); let k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1; }
+
+  // ---- gjendja ----
+  let S;
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function load() { try { const v = JSON.parse(localStorage.getItem(KEY)); if (v && v.matches) return v; } catch (e) {} return null; }
+  function newRound() {
+    const slots = [15, 17, 18, 19, 20, 21];
+    for (const [league, teams] of Object.entries(LEAGUES)) {
+      const names = Object.keys(teams).sort(() => Math.random() - .5);
+      for (let i = 0; i < names.length; i += 2) {
+        const d = new Date(); d.setDate(d.getDate() + 1 + Math.floor(Math.random() * 4));
+        d.setHours(slots[Math.floor(Math.random() * slots.length)], Math.random() < .5 ? 0 : 30, 0, 0);
+        const e = xg(teams[names[i]], teams[names[i + 1]]);
+        S.matches.push({ id: S.nextId++, league, home: names[i], away: names[i + 1], kickoff: d.toISOString(), xh: e.h, xa: e.a, odds: oddsFor(e.h, e.a), status: "open" });
+      }
+    }
+    S.matches.sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  }
+  S = load();
+  if (!S) { S = { balance: 1000, matches: [], bets: [], nextId: 1, nextBet: 1, lastBonus: null }; newRound(); save(); }
+
+  let league = "all", market = MARKETS[0], picks = [], stake = "10", msg = null, view = "book";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const money = (n) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pad = (n) => String(n).padStart(2, "0");
+  const fmt = (iso) => { const d = new Date(iso); return `${DAYS[d.getDay()]}, ${pad(d.getDate())}.${pad(d.getMonth() + 1)} · ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const today = () => new Date().toDateString();
+  const matchById = (id) => S.matches.find((m) => m.id === id);
+
+  function renderHeader() {
+    $("balance").textContent = money(S.balance);
+    $("bonus").hidden = S.lastBonus === today();
+  }
+
+  function renderBook() {
+    const open = S.matches.filter((m) => m.status === "open");
+    const leagues = [...new Set(open.map((m) => m.league))];
+    $("chips").innerHTML = [["all", "Të gjitha"], ...leagues.map((l) => [l, l])]
+      .map(([v, t]) => `<button type="button" class="chip" data-league="${esc(v)}" aria-pressed="${league === v}">${esc(t)}</button>`).join("");
+    $("tabs").innerHTML = MARKETS.map((mk) => `<button type="button" class="tab" data-market="${mk.id}" aria-pressed="${market.id === mk.id}">${mk.label}</button>`).join("");
+    const shown = league === "all" ? open : open.filter((m) => m.league === league);
+    const cols = `cols-${market.sels.length}`;
+    $("events").innerHTML = `<div class="ev-head"><span>Ndeshja</span><div class="odds ${cols}">${market.heads.map((h) => `<span>${h}</span>`).join("")}</div></div>` +
+      (shown.length ? shown.map((m) => `<div class="ev"><div class="ev-info"><div class="ev-meta">${fmt(m.kickoff)} · ${esc(m.league)}</div><div class="ev-team">${esc(m.home)}</div><div class="ev-team">${esc(m.away)}</div></div>
+        <div class="odds ${cols}">${market.sels.map((s) => `<button type="button" class="odd" data-m="${m.id}" data-s="${s}" aria-pressed="${picks.some((p) => p.m === m.id && p.s === s)}" aria-label="${esc(m.home)} – ${esc(m.away)}: ${SEL_NAME[s]} ${m.odds[s].toFixed(2)}">${m.odds[s].toFixed(2)}</button>`).join("")}</div></div>`).join("")
+      : `<p class="empty">Nuk ka ndeshje të hapura. Shtyp “Luaj ndeshjet” për një xhiro të re.</p>`);
+    renderSlip();
+  }
+
+  function renderSlip() {
+    const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1);
+    const st = Number(stake) || 0;
+    $("count").textContent = picks.length;
+    $("headOdds").textContent = picks.length ? `Koef. ${total.toFixed(2)}` : "";
+    const m = msg ? `<p class="msg ${msg.ok ? "ok" : "err"}">${esc(msg.ok || msg.err)}</p>` : "";
+    if (!picks.length) { $("slipBody").innerHTML = `<p class="empty">Kliko një koeficient për ta shtuar në kupon.</p>${m}`; return; }
+    $("slipBody").innerHTML = picks.map((p) => { const mt = matchById(p.m); return `<div class="pick"><div><div class="pick-sel">${SEL_NAME[p.s]}</div><div class="muted small">${esc(mt.home)} – ${esc(mt.away)}</div></div><b class="num">${mt.odds[p.s].toFixed(2)}</b><button type="button" class="x" data-remove="${p.m}" aria-label="Hiq">×</button></div>`; }).join("") +
+      `<div class="row"><span>${picks.length > 1 ? `Kombinim (${picks.length})` : "Tek"}</span><b class="num">${total.toFixed(2)}</b></div>
+       <label class="stake" for="stake"><span>Shuma</span><input id="stake" type="number" min="1" step="1" inputmode="decimal" value="${esc(stake)}"></label>
+       <div class="quick">${[5, 10, 50, 100].map((v) => `<button type="button" data-stake="${v}">${v}</button>`).join("")}</div>
+       <div class="row"><span>Fitimi i mundshëm</span><b class="win num" id="potential">${money(st * total)}</b></div>
+       <button type="button" class="btn btn-accent block" id="place" ${st < 1 || st > S.balance ? "disabled" : ""}>${st > S.balance ? "Bilanc i pamjaftueshëm" : "Vendos bastin"}</button>
+       <button type="button" class="linkbtn" id="clear">Pastro kuponin</button>${m}`;
+  }
+
+  function renderBets() {
+    const won = S.bets.filter((b) => b.status === "won");
+    const staked = S.bets.reduce((s, b) => s + b.stake, 0);
+    const paid = S.bets.reduce((s, b) => s + (b.payout || 0), 0);
+    $("view-bets").innerHTML = `<h1>Bastet e mia</h1>
+      <div class="stats"><div class="card stat"><small>Baste</small><b>${S.bets.length}</b></div><div class="card stat"><small>Fituar</small><b>${won.length}</b></div>
+      <div class="card stat"><small>Luajtur</small><b>${money(staked)}</b></div><div class="card stat"><small>Fituar në pikë</small><b>${money(paid)}</b></div></div>` +
+      (S.bets.length ? `<div class="bets">${S.bets.slice().reverse().map((b) => `<article class="card bet ${b.status}">
+        <div class="bet-top"><span>#${b.id} · ${fmt(b.at)}</span><span class="tag ${b.status}">${STATUS[b.status]}</span></div>
+        ${b.sels.map((s) => { const m = matchById(s.m); return `<div class="bsel"><span class="dot ${s.r}"></span><div><div>${esc(m.home)} – ${esc(m.away)} ${m.status === "done" ? `<b>(${m.hg}–${m.ag})</b>` : ""}</div><div class="muted small">${SEL_SHORT[s.s]} · ${fmt(m.kickoff)}</div></div><b class="num">${s.price.toFixed(2)}</b></div>`; }).join("")}
+        <div class="bet-foot"><span>Shuma <b class="num">${money(b.stake)}</b></span><span>Koef. <b class="num">${b.odds.toFixed(2)}</b></span><span>${b.status === "open" ? "Fitim i mundshëm" : "Pagesa"} <b class="num">${money(b.status === "open" ? b.potential : b.payout)}</b></span></div>
+      </article>`).join("")}</div>` : `<p class="card empty">Nuk ke vendosur ende asnjë bast.</p>`);
+  }
+
+  function renderResults() {
+    const done = S.matches.filter((m) => m.status === "done").slice(-40).reverse();
+    $("view-results").innerHTML = `<h1>Rezultatet</h1>` + (done.length ? `<div class="card results">${done.map((m) => `<div class="res"><span class="muted small">${esc(m.league)} · ${fmt(m.kickoff)}</span><span>${esc(m.home)} <b>${m.hg} – ${m.ag}</b> ${esc(m.away)}</span></div>`).join("")}</div>` : `<p class="card empty">Ende pa rezultate. Shtyp “Luaj ndeshjet”.</p>`);
+  }
+
+  function render() {
+    renderHeader();
+    for (const v of ["book", "bets", "results"]) $("view-" + v).hidden = view !== v;
+    document.querySelectorAll("#nav button").forEach((b) => b.setAttribute("aria-current", b.dataset.view === view));
+    if (view === "book") renderBook(); else if (view === "bets") renderBets(); else renderResults();
+  }
+
+  function place() {
+    const st = r2(Number(stake));
+    if (!(st >= 1)) { msg = { err: "Shuma minimale është 1" }; return; }
+    if (st > S.balance) { msg = { err: "Bilanc i pamjaftueshëm" }; return; }
+    const sels = picks.map((p) => ({ m: p.m, s: p.s, price: matchById(p.m).odds[p.s], r: "pending" }));
+    const odds = r2(sels.reduce((x, s) => x * s.price, 1));
+    const bet = { id: S.nextBet++, stake: st, odds, potential: r2(st * odds), payout: 0, status: "open", at: new Date().toISOString(), sels };
+    S.balance = r2(S.balance - st); S.bets.push(bet); picks = [];
+    msg = { ok: `Basti #${bet.id} u vendos. Fitimi i mundshëm: ${money(bet.potential)}` };
+    save();
+  }
+
+  function playAll() {
+    let wonCount = 0, lostCount = 0, paid = 0;
+    for (const m of S.matches) if (m.status === "open") { m.hg = samplePois(m.xh); m.ag = samplePois(m.xa); m.status = "done"; }
+    for (const b of S.bets) {
+      if (b.status !== "open") continue;
+      for (const s of b.sels) { const m = matchById(s.m); if (m.status === "done") s.r = wins(s.s, m.hg, m.ag) ? "won" : "lost"; }
+      if (b.sels.some((s) => s.r === "lost")) { b.status = "lost"; lostCount++; }
+      else if (b.sels.every((s) => s.r === "won")) { b.status = "won"; b.payout = r2(b.stake * b.odds); S.balance = r2(S.balance + b.payout); paid += b.payout; wonCount++; }
+    }
+    S.matches = S.matches.filter((m) => m.status === "open" || S.bets.some((b) => b.sels.some((s) => s.m === m.id)) || true).slice(-200);
+    picks = []; newRound(); save();
+    msg = (wonCount || lostCount) ? (wonCount ? { ok: `${wonCount} bast(e) fituan: +${money(paid)} pikë. ${lostCount ? lostCount + " humbën." : ""}` } : { err: `${lostCount} bast(e) humbën. Provo përsëri në xhiron e re.` }) : { ok: "Ndeshjet u luajtën. Xhiro e re është gati." };
+    view = (wonCount || lostCount) ? "bets" : "results";
+    if (view === "bets") setTimeout(() => { msg = null; }, 0);
+    render();
+    if (view === "bets") { const p = document.createElement("p"); p.className = "msg " + (wonCount ? "ok" : "err"); p.textContent = wonCount ? `Fitove ${wonCount} bast(e): +${money(paid)} pikë` : `${lostCount} bast(e) humbën`; $("view-bets").insertBefore(p, $("view-bets").children[1]); }
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.view) { view = t.dataset.view; msg = null; render(); window.scrollTo(0, 0); return; }
+    if (t.dataset.league) { league = t.dataset.league; renderBook(); return; }
+    if (t.dataset.market) { market = MARKETS.find((m) => m.id === t.dataset.market); renderBook(); return; }
+    if (t.dataset.m) {
+      const m = Number(t.dataset.m), s = t.dataset.s; msg = null;
+      const same = picks.some((p) => p.m === m && p.s === s);
+      picks = picks.filter((p) => p.m !== m); if (!same && picks.length < 20) picks.push({ m, s });
+      renderBook(); return;
+    }
+    if (t.dataset.remove) { picks = picks.filter((p) => p.m !== Number(t.dataset.remove)); renderBook(); return; }
+    if (t.dataset.stake) { stake = t.dataset.stake; renderSlip(); return; }
+    if (t.id === "place") { place(); render(); return; }
+    if (t.id === "clear") { picks = []; msg = null; renderBook(); return; }
+    if (t.id === "slipHead") { $("slip").classList.toggle("open"); return; }
+    if (t.id === "bonus") { if (S.lastBonus !== today()) { S.lastBonus = today(); S.balance = r2(S.balance + 100); save(); } renderHeader(); if (view === "book") renderSlip(); return; }
+    if (t.id === "playAll") { playAll(); return; }
+  });
+  document.addEventListener("input", (e) => {
+    if (e.target.id !== "stake") return;
+    stake = e.target.value;
+    const total = picks.reduce((p, x) => p * matchById(x.m).odds[x.s], 1), st = Number(stake) || 0;
+    $("potential").textContent = money(st * total);
+    const btn = $("place"); btn.disabled = st < 1 || st > S.balance; btn.textContent = st > S.balance ? "Bilanc i pamjaftueshëm" : "Vendos bastin";
+  });
+  render();
+})();
+</script>
